@@ -52,7 +52,7 @@ cpto init
 **Option C — npm global:**
 
 ```bash
-npm install -g copilot-token-optimizer
+npm install -g @edixos/copilot-token-optimizer
 cpto init
 ```
 

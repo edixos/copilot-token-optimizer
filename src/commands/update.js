@@ -128,7 +128,7 @@ export async function updateCommand(opts) {
     console.log(chalk.yellow(`ℹ cpto is not globally installed — cannot self-update.`));
     console.log('');
     console.log('Run one of:');
-    console.log(`  ${chalk.cyan(`npm install -g copilot-token-optimizer@${latest}`)}`);
+    console.log(`  ${chalk.cyan(`npm install -g @edixos/copilot-token-optimizer@${latest}`)}`);
     console.log(`  ${chalk.cyan(`curl -fsSL https://raw.githubusercontent.com/edixos/copilot-token-optimizer/main/install.sh | bash`)}`);
   }
   console.log('');

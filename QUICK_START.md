@@ -13,7 +13,7 @@ npx copilot-token-optimizer init
 Or install globally:
 
 ```bash
-npm install -g copilot-token-optimizer
+npm install -g @edixos/copilot-token-optimizer
 cpto init
 ```
 

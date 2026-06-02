@@ -35,7 +35,7 @@ if ! command -v npm &>/dev/null; then
 fi
 
 info "Installing copilot-token-optimizer globally..."
-npm install -g copilot-token-optimizer </dev/null
+npm install -g @edixos/copilot-token-optimizer </dev/null
 
 echo ""
 ok "Installed! Run:"
