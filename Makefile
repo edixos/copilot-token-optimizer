@@ -32,4 +32,4 @@ publish-local: check-git install
 		exit 1; \
 	fi
 	@echo "Publishing to npm..."
-	npm publish --access public --otp=$(OTP)
+	npm publish --access public
