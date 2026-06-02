@@ -7,13 +7,13 @@
 # Fires once per session (marker file prevents per-call overhead).
 #
 # INSTALL: cpto hooks install pre-tool-token-guard
-# Or manually: copy to .copilot/hooks/pre-tool-token-guard.sh
+# Or manually: copy to .github/hooks/pre-tool-token-guard.sh
 #
 # CONFIGURE (optional env vars in GitHub Copilot settings):
 #   CPTO_WARN_TOKENS  — token count that triggers a warning  (default: 2000)
 #   CPTO_BLOCK_TOKENS — token count that blocks the tool call (default: 8000)
 
-MARKER=".copilot/sessions/.token-guard-checked"
+MARKER=".github/sessions/.token-guard-checked"
 WARN_TOKENS="${CPTO_WARN_TOKENS:-2000}"
 BLOCK_TOKENS="${CPTO_BLOCK_TOKENS:-8000}"
 
@@ -22,13 +22,13 @@ if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-mkdir -p ".copilot/sessions"
+mkdir -p ".github/sessions"
 
 # Estimate tokens from auto-loaded files (word count × 1.3)
 WORD_COUNT=$(find . -maxdepth 3 \
-  \( -name "*.md" -path "./.copilot/*.md" -o -path "./.github/copilot-instructions.md" -o -path "./docs/INDEX.md" \) \
-  -not -path "./.copilot/completions/*" \
-  -not -path "./.copilot/sessions/*" \
+  \( -name "*.md" -path "./.github/*.md" -o -path "./.github/copilot-instructions.md" -o -path "./docs/INDEX.md" \) \
+  -not -path "./.github/completions/*" \
+  -not -path "./.github/sessions/*" \
   2>/dev/null | xargs wc -w 2>/dev/null | tail -1 | awk '{print $1}')
 
 # Mark checked so subsequent tool calls skip this

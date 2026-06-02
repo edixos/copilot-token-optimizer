@@ -5,12 +5,13 @@ import { createRequire } from 'node:module';
 import { execSync, spawnSync } from 'node:child_process';
 import { appendCtoSections } from './init.js';
 import { hooksCommand } from './hooks.js';
+import { COPILOT_MD_PATH, HOOKS_DIR, PACKAGE_NAME } from '../lib/paths.js';
 
 const { version: current } = createRequire(import.meta.url)('../../package.json');
 
 function getLatestVersion() {
   try {
-    const out = execSync('npm view copilot-token-optimizer version', { encoding: 'utf8', timeout: 10000 });
+    const out = execSync(`npm view ${PACKAGE_NAME} version`, { encoding: 'utf8', timeout: 10000 });
     return out.trim();
   } catch {
     return null;
@@ -19,8 +20,8 @@ function getLatestVersion() {
 
 function isGlobalInstall() {
   try {
-    const out = execSync('npm list -g copilot-token-optimizer --depth=0 2>/dev/null', { encoding: 'utf8' });
-    return out.includes('copilot-token-optimizer');
+    const out = execSync(`npm list -g ${PACKAGE_NAME} --depth=0 2>/dev/null`, { encoding: 'utf8' });
+    return out.includes(PACKAGE_NAME);
   } catch {
     return false;
   }
@@ -31,7 +32,7 @@ async function updateContent(dir) {
   let anyChange = false;
 
   // 1. .github/copilot-instructions.md — append missing sections only
-  const copilotMdPath = path.join(dir, '.github/copilot-instructions.md');
+  const copilotMdPath = path.join(dir, COPILOT_MD_PATH);
   if (fs.existsSync(copilotMdPath)) {
     const existing = fs.readFileSync(copilotMdPath, 'utf8');
     const { content, added } = appendCtoSections(existing, date);
@@ -47,7 +48,7 @@ async function updateContent(dir) {
   }
 
   // 2. Hook templates — re-install any hooks that are already installed
-  const hooksDir = path.join(dir, '.copilot', 'hooks');
+  const hooksDir = path.join(dir, HOOKS_DIR);
   if (fs.existsSync(hooksDir)) {
     const installed = fs.readdirSync(hooksDir).filter(f => f.endsWith('.sh'));
     if (installed.length > 0) {
@@ -110,14 +111,14 @@ export async function updateCommand(opts) {
   if (global) {
     console.log(chalk.blue(`Updating ${current} → ${latest} (global install)...`));
     console.log('');
-    const result = spawnSync('npm', ['install', '-g', `copilot-token-optimizer@${latest}`], {
+    const result = spawnSync('npm', ['install', '-g', `${PACKAGE_NAME}@${latest}`], {
       stdio: 'inherit',
       shell: false,
     });
     if (result.status !== 0) {
       console.log('');
       console.log(chalk.red('✗ Update failed. Try manually:'));
-      console.log(`  npm install -g copilot-token-optimizer@${latest}`);
+      console.log(`  npm install -g ${PACKAGE_NAME}@${latest}`);
       process.exit(1);
     }
     console.log('');

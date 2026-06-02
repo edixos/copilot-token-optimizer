@@ -32,7 +32,7 @@ If you change CLI behavior, add or update tests in `tests/`.
 
 ## Framework Example Contributions
 
-Framework examples live in `examples/`. New examples should explain how to tailor the generated `.github/copilot-instructions.md`, `.copilot/`, and `docs/learnings/` structure for a specific stack.
+Framework examples live in `examples/`. New examples should explain how to tailor the generated `.github/copilot-instructions.md`, `.github/`, and `docs/learnings/` structure for a specific stack.
 
 Each example should include:
 

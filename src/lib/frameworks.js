@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { COMPLETIONS_DIR, COPILOT_IGNORE_PATH, COPILOT_MD_PATH, SESSIONS_DIR } from './paths.js';
 
 export const SUPPORTED_FRAMEWORKS = [
   'express', 'nextjs', 'vue', 'nuxtjs', 'angular',
@@ -8,15 +9,15 @@ export const SUPPORTED_FRAMEWORKS = [
 ];
 
 const BASE_IGNORE = `# Task completion documents
-.copilot/completions/**
+${COMPLETIONS_DIR}/**
 
 # Session files
-.copilot/sessions/**
+${SESSIONS_DIR}/**
 
 # Archived documentation
 docs/archive/**
 
-# User-facing docs (not needed during dev sessions — devs have .github/copilot-instructions.md)
+# User-facing docs (not needed during dev sessions — devs have ${COPILOT_MD_PATH})
 CHANGELOG.md
 README.md
 CONTRIBUTING.md

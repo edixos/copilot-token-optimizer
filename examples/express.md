@@ -234,7 +234,7 @@ NODE_ENV=development
 my-express-project/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Express-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Express structure)
@@ -266,9 +266,9 @@ my-express-project/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For API work, load:
 docs/learnings/api-design.md (~500 tokens)

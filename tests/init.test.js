@@ -87,8 +87,11 @@ describe('unit — pure logic', () => {
     it('returns an array', () => {
       assert.ok(Array.isArray(getInitDirs()));
     });
-    it('includes .copilot/completions', () => {
-      assert.ok(getInitDirs().includes('.copilot/completions'));
+    it('includes .cpto/completions', () => {
+      assert.ok(getInitDirs().includes('.cpto/completions'));
+    });
+    it('includes .github/instructions', () => {
+      assert.ok(getInitDirs().includes('.github/instructions'));
     });
     it('includes docs/archive', () => {
       assert.ok(getInitDirs().includes('docs/archive'));
@@ -186,9 +189,9 @@ describe('integration — filesystem', () => {
     mainFeatures: 'REST API',
   };
 
-  it('creates .copilot/ directory', async () => {
+  it('creates .github/ directory', async () => {
     await runInit(tmpDir, defaultOptions);
-    assert.ok(fs.existsSync(path.join(tmpDir, '.copilot')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.github')));
   });
 
   it('creates .github/copilot-instructions.md', async () => {
@@ -213,19 +216,24 @@ describe('integration — filesystem', () => {
     assert.ok(content.includes('vendor/**'));
   });
 
-  it('creates .copilot/COMMON_MISTAKES.md', async () => {
+  it('creates .cpto/COMMON_MISTAKES.md', async () => {
     await runInit(tmpDir, defaultOptions);
-    assert.ok(fs.existsSync(path.join(tmpDir, '.copilot', 'COMMON_MISTAKES.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.cpto', 'COMMON_MISTAKES.md')));
   });
 
-  it('creates .copilot/QUICK_START.md', async () => {
+  it('creates .cpto/QUICK_START.md', async () => {
     await runInit(tmpDir, defaultOptions);
-    assert.ok(fs.existsSync(path.join(tmpDir, '.copilot', 'QUICK_START.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.cpto', 'QUICK_START.md')));
   });
 
-  it('creates .copilot/ARCHITECTURE_MAP.md', async () => {
+  it('creates .cpto/ARCHITECTURE_MAP.md', async () => {
     await runInit(tmpDir, defaultOptions);
-    assert.ok(fs.existsSync(path.join(tmpDir, '.copilot', 'ARCHITECTURE_MAP.md')));
+    assert.ok(fs.existsSync(path.join(tmpDir, '.cpto', 'ARCHITECTURE_MAP.md')));
+  });
+
+  it('creates .github/instructions/ directory', async () => {
+    await runInit(tmpDir, defaultOptions);
+    assert.ok(fs.existsSync(path.join(tmpDir, '.github', 'instructions')));
   });
 
   it('creates docs/INDEX.md', async () => {
@@ -261,11 +269,11 @@ describe('integration — filesystem', () => {
 
   it('merge path does not overwrite existing customized support files', async () => {
     fs.writeFileSync(path.join(tmpDir, '.github/copilot-instructions.md'), '# My .github/copilot-instructions.md\n\nSome content.\n');
-    fs.mkdirSync(path.join(tmpDir, '.copilot'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.cpto'), { recursive: true });
     const customContent = '# My Custom Mistakes\n\n1. Never do this.\n';
-    fs.writeFileSync(path.join(tmpDir, '.copilot', 'COMMON_MISTAKES.md'), customContent);
+    fs.writeFileSync(path.join(tmpDir, '.cpto', 'COMMON_MISTAKES.md'), customContent);
     await runInit(tmpDir, defaultOptions);
-    const after = fs.readFileSync(path.join(tmpDir, '.copilot', 'COMMON_MISTAKES.md'), 'utf8');
+    const after = fs.readFileSync(path.join(tmpDir, '.cpto', 'COMMON_MISTAKES.md'), 'utf8');
     assert.strictEqual(after, customContent, 'COMMON_MISTAKES.md must not be overwritten on merge');
   });
 
@@ -333,7 +341,7 @@ describe('e2e — subprocess', () => {
   it('--hooks flag installs all hook files', () => {
     execSync(`node "${CTO}" init --yes --framework express --hooks`, { cwd: tmpDir, encoding: 'utf8' });
     const templates = fs.readdirSync(path.join(ROOT, 'templates', 'hooks')).filter(f => f.endsWith('.sh'));
-    const hooksDir = path.join(tmpDir, '.copilot', 'hooks');
+    const hooksDir = path.join(tmpDir, '.github', 'scripts', 'copilot-hooks');
     for (const f of templates) {
       assert.ok(fs.existsSync(path.join(hooksDir, f)), `${f} should be installed by --hooks`);
     }

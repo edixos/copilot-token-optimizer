@@ -8,6 +8,7 @@ node_modules/
 .copilot/
 .copilotignore
 .cursorrules
+.cpto/
 .kiro/
 .mcp.json
 .omc/

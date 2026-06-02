@@ -772,7 +772,7 @@ SECRET_KEY = config('SECRET_KEY')
 my-django-project/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Django-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Django structure)
@@ -804,9 +804,9 @@ my-django-project/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For model work, load:
 docs/learnings/models-and-orm.md (~600 tokens)

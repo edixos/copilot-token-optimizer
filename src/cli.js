@@ -17,7 +17,7 @@ export function run() {
 
   program
     .name('cpto')
-    .description('Copilot Token Optimizer — cut GitHub Copilot context usage by 90%')
+    .description('Copilot Token Optimizer (@edixos/copilot-token-optimizer) — cut GitHub Copilot context usage by 90%')
     .version(version);
 
   program
@@ -82,7 +82,7 @@ export function run() {
 
   hooks
     .command('install [name]')
-    .description('Install a hook template to .copilot/hooks/ (use --all for all hooks)')
+    .description('Install a hook template to .github/hooks/ (use --all for all hooks)')
     .option('-a, --all', 'install all available hook templates')
     .action((name, opts) => hooksCommand('install', name, opts));
 

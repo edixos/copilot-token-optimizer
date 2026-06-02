@@ -4,14 +4,24 @@ import path from 'node:path';
 import { countTokens } from '../lib/tokenizer.js';
 import { getCopilotIgnore } from '../lib/frameworks.js';
 import {
+  ARCHITECTURE_MAP_PATH,
+  COMMON_MISTAKES_PATH,
+  COMPLETIONS_DIR,
+  COPILOT_IGNORE_PATH,
+  COPILOT_MD_PATH,
+  DOCS_INDEX_PATH,
+  QUICK_START_PATH,
+  SESSIONS_DIR,
+} from '../lib/paths.js';
+import {
   buildCopilotMd, buildCommonMistakesMd, buildQuickStartMd,
   buildArchitectureMapMd, buildDocsIndexMd,
 } from './init.js';
 
 const ESSENTIAL_FILES = [
-  '.copilot/COMMON_MISTAKES.md',
-  '.copilot/QUICK_START.md',
-  '.copilot/ARCHITECTURE_MAP.md',
+  COMMON_MISTAKES_PATH,
+  QUICK_START_PATH,
+  ARCHITECTURE_MAP_PATH,
 ];
 
 const FILE_EXCLUSIONS = [
@@ -46,27 +56,27 @@ export function checkCopilotMdContent(content) {
     'No completed tasks in .github/copilot-instructions.md',
     !hasCompleted,
     'warning',
-    hasCompleted ? 'Move completed items to .copilot/completions/' : null,
+    hasCompleted ? `Move completed items to ${COMPLETIONS_DIR}/` : null,
   ));
   const hasDateHeaders = /^##\s+\d{4}-\d{2}-\d{2}/m.test(content);
   results.push(check(
     'No session notes in .github/copilot-instructions.md',
     !hasDateHeaders,
     'warning',
-    hasDateHeaders ? 'Move session notes to .copilot/sessions/' : null,
+    hasDateHeaders ? `Move session notes to ${SESSIONS_DIR}/` : null,
   ));
   return results;
 }
 
 export function checkIgnoreContent(ignoreContent) {
   const results = [];
-  const coversSessions = ignoreContent.includes('.copilot/sessions/') || ignoreContent.includes('.copilot/sessions/**');
-  results.push(check('.copilotignore covers .copilot/sessions/', coversSessions, 'warning',
-    coversSessions ? null : 'Add: .copilot/sessions/** to .copilotignore', 'sessions-cover'));
+  const coversSessions = ignoreContent.includes(`${SESSIONS_DIR}/`) || ignoreContent.includes(`${SESSIONS_DIR}/**`);
+  results.push(check(`.copilotignore covers ${SESSIONS_DIR}/`, coversSessions, 'warning',
+    coversSessions ? null : `Add: ${SESSIONS_DIR}/** to .copilotignore`, 'sessions-cover'));
 
-  const coversCompletions = ignoreContent.includes('.copilot/completions/') || ignoreContent.includes('.copilot/completions/**');
-  results.push(check('.copilotignore covers .copilot/completions/', coversCompletions, 'warning',
-    coversCompletions ? null : 'Add: .copilot/completions/** to .copilotignore', 'completions-cover'));
+  const coversCompletions = ignoreContent.includes(`${COMPLETIONS_DIR}/`) || ignoreContent.includes(`${COMPLETIONS_DIR}/**`);
+  results.push(check(`.copilotignore covers ${COMPLETIONS_DIR}/`, coversCompletions, 'warning',
+    coversCompletions ? null : `Add: ${COMPLETIONS_DIR}/** to .copilotignore`, 'completions-cover'));
 
   const coversArchive = ignoreContent.includes('docs/archive/') || ignoreContent.includes('docs/archive/**');
   results.push(check('copilotignore covers docs/archive/', coversArchive, 'warning',
@@ -116,53 +126,53 @@ export function buildFixSummary(warnings, infos) {
 
 function makeDirectoryFixable(pattern) {
   return (dir) => {
-    const dest = path.join(dir, '.copilotignore');
+    const dest = path.join(dir, COPILOT_IGNORE_PATH);
     if (!fs.existsSync(dest)) return null;
     const content = fs.readFileSync(dest, 'utf8');
     const base = pattern.replace('/**', '/');
     if (content.includes(base)) return null;
     const suffix = content.endsWith('\n') ? '' : '\n';
     fs.appendFileSync(dest, `${suffix}${pattern}\n`);
-    return `.copilotignore (added ${pattern})`;
+    return `${COPILOT_IGNORE_PATH} (added ${pattern})`;
   };
 }
 
 function makeExcludeFixable(filename) {
   return (dir) => {
-    const dest = path.join(dir, '.copilotignore');
+    const dest = path.join(dir, COPILOT_IGNORE_PATH);
     if (!fs.existsSync(dest)) return null;
     const content = fs.readFileSync(dest, 'utf8');
     if (content.split('\n').some(line => line.trim() === filename || line.trim() === `/${filename}`)) return null;
     const suffix = content.endsWith('\n') ? '' : '\n';
     fs.appendFileSync(dest, `${suffix}${filename}\n`);
-    return `.copilotignore (added ${filename})`;
+    return `${COPILOT_IGNORE_PATH} (added ${filename})`;
   };
 }
 
 const FIXABLE = {
   'copilot-md': (dir) => {
     const date = new Date().toISOString().split('T')[0];
-    const dest = path.join(dir, '.github/copilot-instructions.md');
+    const dest = path.join(dir, COPILOT_MD_PATH);
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.writeFileSync(dest, buildCopilotMd('Application', 'Your stack', 'See README', date), 'utf8');
-      return '.github/copilot-instructions.md';
+      return COPILOT_MD_PATH;
     }
   },
   'copilotignore': (dir) => {
-    const dest = path.join(dir, '.copilotignore');
+    const dest = path.join(dir, COPILOT_IGNORE_PATH);
     if (!fs.existsSync(dest)) {
       fs.writeFileSync(dest, getCopilotIgnore(null), 'utf8');
-      return '.copilotignore';
+      return COPILOT_IGNORE_PATH;
     }
   },
   'essential-files': (dir) => {
     const date = new Date().toISOString().split('T')[0];
     const created = [];
     const files = [
-      ['.copilot/COMMON_MISTAKES.md', buildCommonMistakesMd(date)],
-      ['.copilot/QUICK_START.md', buildQuickStartMd(date)],
-      ['.copilot/ARCHITECTURE_MAP.md', buildArchitectureMapMd(date)],
+      [COMMON_MISTAKES_PATH, buildCommonMistakesMd(date)],
+      [QUICK_START_PATH, buildQuickStartMd(date)],
+      [ARCHITECTURE_MAP_PATH, buildArchitectureMapMd(date)],
     ];
     for (const [rel, content] of files) {
       const dest = path.join(dir, rel);
@@ -176,11 +186,11 @@ const FIXABLE = {
   },
   'docs-index': (dir) => {
     const date = new Date().toISOString().split('T')[0];
-    const dest = path.join(dir, 'docs', 'INDEX.md');
+    const dest = path.join(dir, DOCS_INDEX_PATH);
     if (!fs.existsSync(dest)) {
       fs.mkdirSync(path.dirname(dest), { recursive: true });
       fs.writeFileSync(dest, buildDocsIndexMd(date), 'utf8');
-      return 'docs/INDEX.md';
+      return DOCS_INDEX_PATH;
     }
   },
 };
@@ -189,8 +199,8 @@ for (const { filename, fixKey } of FILE_EXCLUSIONS) {
   FIXABLE[fixKey] = makeExcludeFixable(filename);
 }
 
-FIXABLE['sessions-cover']    = makeDirectoryFixable('.copilot/sessions/**');
-FIXABLE['completions-cover'] = makeDirectoryFixable('.copilot/completions/**');
+FIXABLE['sessions-cover']    = makeDirectoryFixable(`${SESSIONS_DIR}/**`);
+FIXABLE['completions-cover'] = makeDirectoryFixable(`${COMPLETIONS_DIR}/**`);
 FIXABLE['archive-cover']     = makeDirectoryFixable('docs/archive/**');
 
 // --- Public API ---
@@ -208,9 +218,9 @@ export function applyFixes(dir, results) {
 
 export function runAudit(dir) {
   const results = [];
-  const copilotMdPath = path.join(dir, '.github/copilot-instructions.md');
+  const copilotMdPath = path.join(dir, COPILOT_MD_PATH);
   const copilotMdExists = fs.existsSync(copilotMdPath);
-  results.push(check('.github/copilot-instructions.md present', copilotMdExists, 'error',
+  results.push(check(`${COPILOT_MD_PATH} present`, copilotMdExists, 'error',
     copilotMdExists ? null : 'Run: cpto init  (or: cpto audit --fix)', 'copilot-md'));
 
   if (copilotMdExists) {
@@ -218,12 +228,12 @@ export function runAudit(dir) {
     results.push(...checkCopilotMdContent(content));
   }
 
-  const ignoreExists = fs.existsSync(path.join(dir, '.copilotignore'));
-  results.push(check('.copilotignore present', ignoreExists, 'info',
+  const ignoreExists = fs.existsSync(path.join(dir, COPILOT_IGNORE_PATH));
+  results.push(check(`${COPILOT_IGNORE_PATH} present`, ignoreExists, 'info',
     ignoreExists ? null : 'Run: cpto init  (or: cpto audit --fix)', 'copilotignore'));
 
   if (ignoreExists) {
-    const ignoreContent = fs.readFileSync(path.join(dir, '.copilotignore'), 'utf8');
+    const ignoreContent = fs.readFileSync(path.join(dir, COPILOT_IGNORE_PATH), 'utf8');
     results.push(...checkIgnoreContent(ignoreContent));
   }
 
@@ -236,7 +246,7 @@ export function runAudit(dir) {
     'essential-files',
   ));
 
-  const docsIndexExists = fs.existsSync(path.join(dir, 'docs', 'INDEX.md'));
+  const docsIndexExists = fs.existsSync(path.join(dir, DOCS_INDEX_PATH));
   results.push(check('docs/INDEX.md present', docsIndexExists, 'info',
     docsIndexExists ? null : 'Run: cpto init  (or: cpto audit --fix)', 'docs-index'));
 

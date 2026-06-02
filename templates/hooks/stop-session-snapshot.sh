@@ -1,19 +1,19 @@
 #!/bin/bash
 # stop-session-snapshot.sh
 # EVENT: Stop
-# DESCRIPTION: Write a session snapshot to .copilot/sessions/snapshot.md after each turn
+# DESCRIPTION: Write a session snapshot to .github/sessions/snapshot.md after each turn
 #
 # GitHub Copilot Stop hook: captures changed files, recent commits, and token
 # estimate into a compact snapshot. The snapshot is injected at the start of
 # the next session by user-prompt-inject-snapshot.sh (or via .github/copilot-instructions.md @ import).
 #
 # INSTALL: cpto hooks install stop-session-snapshot
-# Or manually: copy to .copilot/hooks/stop-session-snapshot.sh
+# Or manually: copy to .github/hooks/stop-session-snapshot.sh
 
-SNAPSHOT=".copilot/sessions/snapshot.md"
+SNAPSHOT=".github/sessions/snapshot.md"
 DATE=$(date +"%Y-%m-%d %H:%M")
 
-mkdir -p ".copilot/sessions"
+mkdir -p ".github/sessions"
 
 # --- Changed files (unstaged + staged + last commit) ---
 CHANGED_FILES=""
@@ -40,9 +40,9 @@ fi
 
 # --- Token estimate for auto-loaded files ---
 WORD_COUNT=$(find . -maxdepth 3 \
-  \( -name "*.md" -path "./.copilot/*.md" -o -path "./.github/copilot-instructions.md" -o -path "./docs/INDEX.md" \) \
-  -not -path "./.copilot/completions/*" \
-  -not -path "./.copilot/sessions/*" \
+  \( -name "*.md" -path "./.github/*.md" -o -path "./.github/copilot-instructions.md" -o -path "./docs/INDEX.md" \) \
+  -not -path "./.github/completions/*" \
+  -not -path "./.github/sessions/*" \
   2>/dev/null | xargs wc -w 2>/dev/null | tail -1 | awk '{print $1}')
 WORD_COUNT="${WORD_COUNT:-0}"
 APPROX_TOKENS=$(echo "$WORD_COUNT * 13 / 10" | bc 2>/dev/null || echo "?")

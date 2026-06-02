@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { countTokens } from '../lib/tokenizer.js';
+import { COMPLETIONS_DIR, COPILOT_MD_PATH, CPTO_DIR, SESSIONS_ARCHIVE_DIR } from '../lib/paths.js';
 
 function promptUser(rl, question) {
   return new Promise(resolve => rl.question(question, resolve));
@@ -95,7 +96,7 @@ export function removeSection(content, sectionRaw) {
 
 // Pure: formats a single dry-run line for display
 export function formatDryRunLine(target, index) {
-  const dest = target.destination ? `→ Archive to .copilot/${target.destination}/` : '→ Delete';
+  const dest = target.destination ? `→ Archive to ${CPTO_DIR}/${target.destination}/` : '→ Delete';
   return [
     `  [${index + 1}] "${target.heading}" (line ${target.startLine}, ${target.tokens} tokens)`,
     `      ${dest}`,
@@ -125,7 +126,7 @@ export function applyPruneTargets(content, targets) {
 }
 
 function writeArchive(dir, target, date) {
-  const archiveDir = path.join(dir, '.copilot', target.destination);
+  const archiveDir = path.join(dir, CPTO_DIR, target.destination);
   fs.mkdirSync(archiveDir, { recursive: true });
   const archiveFile = path.join(archiveDir, buildArchiveName(date, target.heading));
   fs.writeFileSync(archiveFile, buildArchiveContent(date, target.content), 'utf8');
@@ -143,7 +144,7 @@ function printDryRun(targets) {
 }
 
 async function confirmTarget(rl, target, index) {
-  const dest = target.destination ? `→ Archive to .copilot/${target.destination}/` : '→ Delete';
+  const dest = target.destination ? `→ Archive to ${CPTO_DIR}/${target.destination}/` : '→ Delete';
   console.log(`  [${index + 1}] Section "${target.heading}" (line ${target.startLine}, ${target.tokens} tokens)`);
   console.log(`      ${chalk.dim(dest)}`);
   const ans = await promptUser(rl, chalk.blue(`      Apply? [Y/n] `));
@@ -151,7 +152,7 @@ async function confirmTarget(rl, target, index) {
 }
 
 function printTargetYes(target, index) {
-  const dest = target.destination ? `→ Archive to .copilot/${target.destination}/` : '→ Delete';
+  const dest = target.destination ? `→ Archive to ${CPTO_DIR}/${target.destination}/` : '→ Delete';
   console.log(`  [${index + 1}] Section "${target.heading}" (line ${target.startLine}, ${target.tokens} tokens)`);
   console.log(`      ${chalk.dim(dest)}`);
 }

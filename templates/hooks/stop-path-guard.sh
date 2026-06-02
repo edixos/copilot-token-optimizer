@@ -8,7 +8,7 @@
 # exits 2 — forcing Copilot to self-correct before the turn completes.
 #
 # INSTALL: cpto hooks install stop-path-guard
-# Or manually: copy to .copilot/hooks/stop-path-guard.sh
+# Or manually: copy to .github/hooks/stop-path-guard.sh
 #
 # CONFIGURE (optional):
 #   CPTO_PATH_GUARD_DISABLE=1  — bypass all checks

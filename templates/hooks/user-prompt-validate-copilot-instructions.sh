@@ -8,13 +8,13 @@
 # stderr (user sees them). Clean .github/copilot-instructions.md produces no output.
 #
 # INSTALL: cpto hooks install user-prompt-validate-copilot-instructions
-# Or manually: copy to .copilot/hooks/user-prompt-validate-copilot-instructions.sh
+# Or manually: copy to .github/hooks/user-prompt-validate-copilot-instructions.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_COPILOT_MD_PATH       — path to .github/copilot-instructions.md (default: .github/copilot-instructions.md)
 #   CPTO_TOKEN_WARN_THRESHOLD — token count warning threshold (default: 600)
 
-MARKER=".copilot/sessions/.copilot-md-validated-$(date +%Y-%m-%d)"
+MARKER=".github/sessions/.copilot-instructions-validated-$(date +%Y-%m-%d)"
 COPILOT_MD="${CPTO_COPILOT_MD_PATH:-.github/copilot-instructions.md}"
 TOKEN_THRESHOLD="${CPTO_TOKEN_WARN_THRESHOLD:-600}"
 
@@ -23,7 +23,7 @@ if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-mkdir -p ".copilot/sessions"
+mkdir -p ".github/sessions"
 touch "$MARKER"
 
 # .github/copilot-instructions.md missing — silent, not an error (project may not use cpto)
@@ -55,7 +55,7 @@ completed_headers = [
 if completed_headers:
     for h in completed_headers:
         lineno = lines.index(h) + 1
-        issues.append(f'Completed tasks in .github/copilot-instructions.md (line {lineno}: "{h.strip()}"). Move to .copilot/completions/')
+        issues.append(f'Completed tasks in .github/copilot-instructions.md (line {lineno}: "{h.strip()}"). Move to .github/completions/')
 
 # Check 3: Session notes embedded (date headers like ## 2026-05-20)
 date_headers = [
@@ -64,7 +64,7 @@ date_headers = [
 ]
 if date_headers:
     for lineno, h in date_headers:
-        issues.append(f'Session note embedded (line {lineno}: "{h.strip()}"). Move to .copilot/sessions/archive/')
+        issues.append(f'Session note embedded (line {lineno}: "{h.strip()}"). Move to .github/sessions/archive/')
 
 # Check 4: Large inline content that should be @ imports
 # Flag if any section is >200 words (suggests copy-pasted content)

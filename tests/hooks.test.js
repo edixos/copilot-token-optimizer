@@ -62,7 +62,7 @@ describe('unit — pure logic', () => {
       const hooks = [{ event: 'Stop', file: 'stop.sh', name: 'stop' }];
       const block = buildSettingsBlock(hooks);
       const cmd = block.hooks.Stop[0].hooks[0].command;
-      assert.equal(cmd, 'bash .copilot/hooks/stop.sh');
+      assert.equal(cmd, 'bash .github/scripts/copilot-hooks/stop.sh');
     });
 
     it('returns valid JSON-serialisable structure', () => {

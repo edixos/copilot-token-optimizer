@@ -185,7 +185,7 @@ describe('unit — pure logic', () => {
       assert.ok(line.includes('"Completed"'));
       assert.ok(line.includes('line 5'));
       assert.ok(line.includes('42 tokens'));
-      assert.ok(line.includes('→ Archive to .copilot/completions/'));
+      assert.ok(line.includes('→ Archive to .cpto/completions/'));
     });
 
     it('formats an empty target with Delete destination', () => {
@@ -284,7 +284,7 @@ describe('integration — filesystem', () => {
     }
   });
 
-  it('archives a Completed section to .copilot/completions/', async () => {
+  it('archives a Completed section to .cpto/completions/', async () => {
     const tmpDir = makeTmpDir();
     const copilotMd = path.join(tmpDir, '.github/copilot-instructions.md');
     const content = '# Project\n\n## Active\n\nwork\n\n## Completed\n\n- done task\n';
@@ -294,7 +294,7 @@ describe('integration — filesystem', () => {
       process.chdir(tmpDir);
       const { pruneCommand } = await import('../src/commands/prune.js');
       await pruneCommand({ yes: true, backup: false });
-      const archiveDir = path.join(tmpDir, '.copilot', 'completions');
+      const archiveDir = path.join(tmpDir, '.cpto', 'completions');
       assert.ok(fs.existsSync(archiveDir), 'completions dir should be created');
       const files = fs.readdirSync(archiveDir);
       assert.strictEqual(files.length, 1, 'one archive file should be written');

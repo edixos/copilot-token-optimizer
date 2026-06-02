@@ -31,9 +31,9 @@ describe('scanAutoLoadFiles', () => {
     assert.ok(rels.includes('README.md'), 'should include README.md');
   });
 
-  it('picks up .copilot/*.md files', async () => {
-    fs.mkdirSync(path.join(tmpDir, '.copilot'));
-    fs.writeFileSync(path.join(tmpDir, '.copilot', 'COMMON_MISTAKES.md'), '# Mistakes');
+  it('picks up .cpto/*.md files', async () => {
+    fs.mkdirSync(path.join(tmpDir, '.cpto'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.cpto', 'COMMON_MISTAKES.md'), '# Mistakes');
     const files = await scanAutoLoadFiles(tmpDir);
     const names = files.map(f => path.basename(f.path));
     assert.ok(names.includes('COMMON_MISTAKES.md'));
@@ -56,9 +56,9 @@ describe('scanAutoLoadFiles', () => {
   });
 
   it('respects .copilotignore patterns', async () => {
-    fs.mkdirSync(path.join(tmpDir, '.copilot', 'sessions'), { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, '.copilot', 'sessions', 'old.md'), '# Old session');
-    fs.writeFileSync(path.join(tmpDir, '.copilotignore'), '.copilot/sessions/**');
+    fs.mkdirSync(path.join(tmpDir, '.cpto', 'sessions'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.cpto', 'sessions', 'old.md'), '# Old session');
+    fs.writeFileSync(path.join(tmpDir, '.copilotignore'), '.cpto/sessions/**');
     const files = await scanAutoLoadFiles(tmpDir);
     const paths = files.map(f => f.path);
     assert.ok(!paths.some(p => p.includes('sessions')), 'should exclude sessions dir');

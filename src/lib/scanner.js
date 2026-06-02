@@ -1,16 +1,10 @@
 import { glob } from 'glob';
 import fs from 'node:fs';
 import path from 'node:path';
-
-const AUTO_LOAD_PATTERNS = [
-  '*.md',
-  '.github/**/*.md',
-  '.copilot/*.md',
-  'docs/**/*.md',
-];
+import { AUTO_LOAD_PATTERNS, COPILOT_IGNORE_PATH } from './paths.js';
 
 function readIgnorePatterns(dir) {
-  const ignorePath = path.join(dir, '.copilotignore');
+  const ignorePath = path.join(dir, COPILOT_IGNORE_PATH);
   if (!fs.existsSync(ignorePath)) return [];
   return fs.readFileSync(ignorePath, 'utf8')
     .split('\n')

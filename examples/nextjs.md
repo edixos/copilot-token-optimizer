@@ -359,7 +359,7 @@ DATABASE_URL=...           # Server-side only
 my-nextjs-project/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Next.js-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (App/Pages router)
@@ -391,9 +391,9 @@ my-nextjs-project/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For routing work, load:
 docs/learnings/routing-patterns.md (~500 tokens)

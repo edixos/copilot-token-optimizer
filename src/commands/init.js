@@ -3,6 +3,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { getCopilotIgnore, isKnownFramework, detectFramework, SUPPORTED_FRAMEWORKS } from '../lib/frameworks.js';
+import {
+  ARCHITECTURE_MAP_PATH,
+  COMMON_MISTAKES_PATH,
+  COMPLETIONS_DIR,
+  COPILOT_IGNORE_PATH,
+  COPILOT_MD_PATH,
+  CORE_REFERENCE_FILES,
+  CPTO_DIR,
+  DOCS_INDEX_PATH,
+  INSTRUCTIONS_DIR,
+  PACKAGE_NAME,
+  QUICK_START_PATH,
+  SESSIONS_DIR,
+  SESSIONS_ARCHIVE_DIR,
+  SESSIONS_ACTIVE_DIR,
+  TEMPLATES_DIR,
+} from '../lib/paths.js';
 import { hooksCommand } from './hooks.js';
 
 function prompt(rl, question) {
@@ -35,22 +52,23 @@ Use this file as the startup summary for Copilot Chat. For non-trivial work, con
 
 \`\`\`bash
 # High-signal docs (~800 tokens total)
-✓ .copilot/COMMON_MISTAKES.md      # ⚠️ CRITICAL - Read FIRST
-✓ .copilot/QUICK_START.md          # Essential commands
-✓ .copilot/ARCHITECTURE_MAP.md     # File locations
+✓ ${COMMON_MISTAKES_PATH}      # ⚠️ CRITICAL - Read FIRST
+✓ ${QUICK_START_PATH}          # Essential commands
+✓ ${ARCHITECTURE_MAP_PATH}     # File locations
 \`\`\`
 
 **Load topic docs only when the task needs them:**
-- Use \`docs/INDEX.md\` to find deep-dive notes in \`docs/learnings/\`
+- Use \`${DOCS_INDEX_PATH}\` to find deep-dive notes in \`docs/learnings/\`
+- Put any path-specific instructions in \`${INSTRUCTIONS_DIR}/NAME.instructions.md\`
 - Pull in only the topic files that match the current task
 
 **At task completion:**
-- Create completion doc in \`.copilot/completions/YYYY-MM-DD-task-name.md\`
-- Move session file to \`.copilot/sessions/archive/\` (if created)
+- Create completion doc in \`${COMPLETIONS_DIR}/YYYY-MM-DD-task-name.md\`
+- Move session file to \`${SESSIONS_ARCHIVE_DIR}/\` (if created)
 
 **⚠️ NEVER auto-load:**
-- Files in \`.copilot/completions/\` (0 token cost)
-- Files in \`.copilot/sessions/\` (0 token cost)
+- Files in \`${COMPLETIONS_DIR}/\` (0 token cost)
+- Files in \`${SESSIONS_DIR}/\` (0 token cost)
 - Files in \`docs/archive/\` (0 token cost)
 
 ---
@@ -149,22 +167,23 @@ Use this file as the startup summary for Copilot Chat. For non-trivial work, con
 
 \`\`\`bash
 # High-signal docs (~800 tokens total)
-✓ .copilot/COMMON_MISTAKES.md      # ⚠️ CRITICAL - Read FIRST
-✓ .copilot/QUICK_START.md          # Essential commands
-✓ .copilot/ARCHITECTURE_MAP.md     # File locations
+✓ ${COMMON_MISTAKES_PATH}      # ⚠️ CRITICAL - Read FIRST
+✓ ${QUICK_START_PATH}          # Essential commands
+✓ ${ARCHITECTURE_MAP_PATH}     # File locations
 \`\`\`
 
 **Load topic docs only when the task needs them:**
-- Use \`docs/INDEX.md\` to find deep-dive notes in \`docs/learnings/\`
+- Use \`${DOCS_INDEX_PATH}\` to find deep-dive notes in \`docs/learnings/\`
+- Put any path-specific instructions in \`${INSTRUCTIONS_DIR}/NAME.instructions.md\`
 - Pull in only the topic files that match the current task
 
 **At task completion:**
-- Create completion doc in \`.copilot/completions/YYYY-MM-DD-task-name.md\`
-- Move session file to \`.copilot/sessions/archive/\` (if created)
+- Create completion doc in \`${COMPLETIONS_DIR}/YYYY-MM-DD-task-name.md\`
+- Move session file to \`${SESSIONS_ARCHIVE_DIR}/\` (if created)
 
 **⚠️ NEVER auto-load:**
-- Files in \`.copilot/completions/\` (0 token cost)
-- Files in \`.copilot/sessions/\` (0 token cost)
+- Files in \`${COMPLETIONS_DIR}/\` (0 token cost)
+- Files in \`${SESSIONS_DIR}/\` (0 token cost)
 - Files in \`docs/archive/\` (0 token cost)`;
 }
 
@@ -206,9 +225,14 @@ export function buildDocsIndexMd(date) {
 ## Core Copilot Context (~800 tokens)
 
 - \`.github/copilot-instructions.md\` (~450 tokens)
-- \`.copilot/COMMON_MISTAKES.md\` (~350 tokens)
-- \`.copilot/QUICK_START.md\` (~100 tokens)
-- \`.copilot/ARCHITECTURE_MAP.md\` (~150 tokens)
+- \`${COMMON_MISTAKES_PATH}\` (~350 tokens)
+- \`${QUICK_START_PATH}\` (~100 tokens)
+- \`${ARCHITECTURE_MAP_PATH}\` (~150 tokens)
+
+## Path-Specific Instructions
+
+- Put file-scoped instructions in \`${INSTRUCTIONS_DIR}/NAME.instructions.md\`
+- Keep them narrow and only create them when a path-specific rule is needed
 
 ## Task-Specific Topics (Load Only When Needed)
 
@@ -223,10 +247,11 @@ Add topic files in \`docs/learnings/\` and list them here.
 // Pure: returns the list of dirs to create
 export function getInitDirs() {
   return [
-    '.copilot/completions',
-    '.copilot/sessions/active',
-    '.copilot/sessions/archive',
-    '.copilot/templates',
+    COMPLETIONS_DIR,
+    SESSIONS_ACTIVE_DIR,
+    SESSIONS_ARCHIVE_DIR,
+    TEMPLATES_DIR,
+    INSTRUCTIONS_DIR,
     'docs/learnings',
     'docs/archive',
   ];
@@ -234,12 +259,12 @@ export function getInitDirs() {
 
 // Writes all generated files into dir
 export function writeInitFiles(dir, fw, projectType, techStack, mainFeatures, date) {
-  writeFile(path.join(dir, '.copilotignore'), getCopilotIgnore(fw));
-  writeFile(path.join(dir, '.github/copilot-instructions.md'), buildCopilotMd(projectType, techStack, mainFeatures, date));
-  writeFile(path.join(dir, '.copilot', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
-  writeFile(path.join(dir, '.copilot', 'QUICK_START.md'), buildQuickStartMd(date));
-  writeFile(path.join(dir, '.copilot', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
-  writeFile(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+  writeFile(path.join(dir, COPILOT_IGNORE_PATH), getCopilotIgnore(fw));
+  writeFile(path.join(dir, COPILOT_MD_PATH), buildCopilotMd(projectType, techStack, mainFeatures, date));
+  writeFile(path.join(dir, COMMON_MISTAKES_PATH), buildCommonMistakesMd(date));
+  writeFile(path.join(dir, QUICK_START_PATH), buildQuickStartMd(date));
+  writeFile(path.join(dir, ARCHITECTURE_MAP_PATH), buildArchitectureMapMd(date));
+  writeFile(path.join(dir, DOCS_INDEX_PATH), buildDocsIndexMd(date));
 }
 
 // Returns { framework, detected, unknown } — pure-ish (calls detectFramework)
@@ -274,7 +299,7 @@ export async function promptProjectInfo(rl) {
 export function printHeader() {
   console.log('');
   console.log(chalk.bold('╔════════════════════════════════════════════════╗'));
-  console.log(chalk.bold('║   Copilot Token Optimizer - Project Setup       ║'));
+  console.log(chalk.bold('║   Copilot Token Optimizer - Project Setup      ║'));
   console.log(chalk.bold('╚════════════════════════════════════════════════╝'));
   console.log('');
 }
@@ -304,10 +329,10 @@ export function printSetupComplete() {
 
 export function printNextSteps() {
   console.log('📝 Next Steps:');
-  console.log(`   1. Customize ${chalk.cyan('.copilot/COMMON_MISTAKES.md')}`);
-  console.log(`   2. Update ${chalk.cyan('.copilot/QUICK_START.md')} with your commands`);
-  console.log(`   3. Fill in ${chalk.cyan('.copilot/ARCHITECTURE_MAP.md')}`);
-  console.log(`   4. Add to CI: ${chalk.cyan('npx copilot-token-optimizer audit --json')}`);
+  console.log(`   1. Customize ${chalk.cyan(COMMON_MISTAKES_PATH)}`);
+  console.log(`   2. Update ${chalk.cyan(QUICK_START_PATH)} with your commands`);
+  console.log(`   3. Fill in ${chalk.cyan(ARCHITECTURE_MAP_PATH)}`);
+  console.log(`   4. Add to CI: ${chalk.cyan(`npx ${PACKAGE_NAME} audit --json`)}`);
   console.log('');
   console.log(`   Run ${chalk.cyan('cpto measure')} to verify savings`);
   console.log('');
@@ -351,7 +376,7 @@ export async function runInit(dir, options) {
   const date = new Date().toISOString().split('T')[0];
   const { projectType, techStack, mainFeatures, framework, force } = options;
 
-  const copilotMdPath = path.join(dir, '.github/copilot-instructions.md');
+  const copilotMdPath = path.join(dir, COPILOT_MD_PATH);
 
   for (const d of getInitDirs()) {
     fs.mkdirSync(path.join(dir, d), { recursive: true });
@@ -367,11 +392,11 @@ export async function runInit(dir, options) {
     }
     fs.writeFileSync(copilotMdPath, content, 'utf8');
     const writeIfMissing = (p, c) => { if (!fs.existsSync(p)) writeFile(p, c); };
-    writeIfMissing(path.join(dir, '.copilotignore'), getCopilotIgnore(fw));
-    writeIfMissing(path.join(dir, '.copilot', 'COMMON_MISTAKES.md'), buildCommonMistakesMd(date));
-    writeIfMissing(path.join(dir, '.copilot', 'QUICK_START.md'), buildQuickStartMd(date));
-    writeIfMissing(path.join(dir, '.copilot', 'ARCHITECTURE_MAP.md'), buildArchitectureMapMd(date));
-    writeIfMissing(path.join(dir, 'docs', 'INDEX.md'), buildDocsIndexMd(date));
+    writeIfMissing(path.join(dir, COPILOT_IGNORE_PATH), getCopilotIgnore(fw));
+    writeIfMissing(path.join(dir, COMMON_MISTAKES_PATH), buildCommonMistakesMd(date));
+    writeIfMissing(path.join(dir, QUICK_START_PATH), buildQuickStartMd(date));
+    writeIfMissing(path.join(dir, ARCHITECTURE_MAP_PATH), buildArchitectureMapMd(date));
+    writeIfMissing(path.join(dir, DOCS_INDEX_PATH), buildDocsIndexMd(date));
     return { created: false, merged: true, added };
   }
 

@@ -1191,7 +1191,7 @@ env('APP_KEY')
 my-laravel-app/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Laravel-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Laravel structure)
@@ -1228,9 +1228,9 @@ my-laravel-app/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For Eloquent/models, load:
 docs/learnings/eloquent-orm.md (~700 tokens)

@@ -1,16 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { countTokens } from '../lib/tokenizer.js';
+import { SESSIONS_DIR, WATCHED_FILES, WRITE_LOG_PATH } from '../lib/paths.js';
 
-const WATCHED = [
-  { rel: '.github/copilot-instructions.md', target: 450 },
-  { rel: '.copilot/COMMON_MISTAKES.md', target: 350 },
-  { rel: '.copilot/QUICK_START.md', target: 100 },
-  { rel: '.copilot/ARCHITECTURE_MAP.md', target: 150 },
-  { rel: 'docs/INDEX.md', target: null },
-];
-
-const WRITE_LOG = '.copilot/sessions/write-log.md';
+const WATCHED = WATCHED_FILES;
+const WRITE_LOG = WRITE_LOG_PATH;
 const BAR_WIDTH = 10;
 
 export function bar(tokens, target) {
@@ -88,8 +82,8 @@ export function setupDirWatchers(dir, onUpdate) {
   const dirs = [
     dir,
     path.join(dir, '.github'),
-    path.join(dir, '.copilot'),
-    path.join(dir, '.copilot', 'sessions'),
+    path.join(dir, '.github', 'instructions'),
+    path.join(dir, SESSIONS_DIR),
     path.join(dir, 'docs'),
   ];
   const watchers = [];

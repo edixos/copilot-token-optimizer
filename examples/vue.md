@@ -557,7 +557,7 @@ VITE_API_URL=...       # Client-side (VITE_ prefix required)
 my-vue-project/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Vue-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Vue structure)
@@ -590,9 +590,9 @@ my-vue-project/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For component work, load:
 docs/learnings/component-patterns.md (~600 tokens)

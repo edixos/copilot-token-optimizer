@@ -1184,7 +1184,7 @@ this.configService.get<string>('DATABASE_URL');
 my-nestjs-app/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (NestJS-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (NestJS structure)
@@ -1216,9 +1216,9 @@ my-nestjs-app/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For modules/DI, load:
 docs/learnings/modules-and-di.md (~600 tokens)

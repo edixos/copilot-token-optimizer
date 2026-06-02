@@ -3,10 +3,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import readline from 'node:readline';
+import { HOOKS_DIR, HOOKS_SCRIPTS_DIR, PACKAGE_NAME } from '../lib/paths.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const TEMPLATES_DIR = path.resolve(__dirname, '../../templates/hooks');
-const HOOKS_INSTALL_DIR = path.join(process.cwd(), '.copilot', 'hooks');
+const HOOKS_SCRIPTS_INSTALL_DIR = path.join(process.cwd(), HOOKS_SCRIPTS_DIR);
 
 // --- Pure functions (no fs, no console, no process) ---
 
@@ -25,11 +26,11 @@ export function buildSettingsBlock(installedHooks) {
   const hooksBlock = {};
   for (const [event, hooks] of Object.entries(byEvent)) {
     hooksBlock[event] = hooks.map(h => ({
-      hooks: [{ type: 'command', command: `bash .copilot/hooks/${h.file}` }],
+      hooks: [{ type: 'command', command: `bash ${HOOKS_SCRIPTS_DIR}/${h.file}` }],
     }));
   }
   return {
-    tool: 'copilot-token-optimizer',
+    tool: PACKAGE_NAME,
     kind: 'helper-script-manifest',
     note: 'GitHub Copilot has no native CLI hook settings file; use these commands from VS Code tasks, wrapper scripts, or CI.',
     hooks: hooksBlock,
@@ -84,7 +85,7 @@ export function installHook(name, templatesDir, installDir, opts) {
       const dst = path.join(installDir, hook.file);
       fs.copyFileSync(path.join(templatesDir, hook.file), dst);
       fs.chmodSync(dst, 0o755);
-      console.log(chalk.green(`✓ Installed: .copilot/hooks/${hook.file}`));
+      console.log(chalk.green(`✓ Installed: ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
     }
     console.log(chalk.bold(`\n${templates.length} hooks installed.`));
     console.log(chalk.dim('Run: cpto hooks settings  to print a helper-script manifest'));
@@ -104,7 +105,7 @@ export function installHook(name, templatesDir, installDir, opts) {
   const dst = path.join(installDir, hook.file);
   fs.copyFileSync(path.join(templatesDir, hook.file), dst);
   fs.chmodSync(dst, 0o755);
-  console.log(chalk.green(`✓ Installed: .copilot/hooks/${hook.file}`));
+  console.log(chalk.green(`✓ Installed: ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
   _printSettingsHint(hook);
 }
 
@@ -119,11 +120,11 @@ export async function removeHook(name, installDir, opts) {
     process.exit(1);
   }
   if (!opts?.yes) {
-    const ans = await confirm(`Remove .copilot/hooks/${name}.sh? [y/N] `);
+    const ans = await confirm(`Remove ${HOOKS_SCRIPTS_DIR}/${name}.sh? [y/N] `);
     if (ans.trim().toLowerCase() !== 'y') { console.log('Cancelled.'); return; }
   }
   fs.unlinkSync(dst);
-  console.log(chalk.green(`✓ Removed: .copilot/hooks/${name}.sh`));
+  console.log(chalk.green(`✓ Removed: ${HOOKS_SCRIPTS_DIR}/${name}.sh`));
 }
 
 export function statusHooks(templatesDir, installDir) {
@@ -161,7 +162,7 @@ export function settingsHooks(templatesDir, installDir) {
 export async function hooksCommand(sub, name, opts) {
   sub = sub ?? 'list';
   const tDir = TEMPLATES_DIR;
-  const iDir = HOOKS_INSTALL_DIR;
+  const iDir = HOOKS_SCRIPTS_INSTALL_DIR;
 
   if (sub === 'list')     return listHooks(tDir, iDir);
   if (sub === 'install')  return installHook(name, tDir, iDir, opts);
@@ -177,5 +178,5 @@ export async function hooksCommand(sub, name, opts) {
 function _printSettingsHint(hook) {
   console.log(chalk.dim('\nGitHub Copilot does not expose a native CLI hook settings file.'));
   console.log(chalk.dim('Run this helper script from a VS Code task, wrapper, or CI step:'));
-  console.log(chalk.dim(`  bash .copilot/hooks/${hook.file}`));
+  console.log(chalk.dim(`  bash ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
 }

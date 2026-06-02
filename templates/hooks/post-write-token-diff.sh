@@ -1,19 +1,19 @@
 #!/bin/bash
 # post-write-token-diff.sh
 # EVENT: PostToolUse
-# DESCRIPTION: Log token cost of each Write/Edit to .copilot/sessions/write-log.md
+# DESCRIPTION: Log token cost of each Write/Edit to .github/sessions/write-log.md
 #
 # GitHub Copilot PostToolUse hook: logs token cost of each Write/Edit operation.
-# Appends to .copilot/sessions/write-log.md so you can see which files are
+# Appends to .github/sessions/write-log.md so you can see which files are
 # growing your context window.
 #
 # INSTALL: cpto hooks install post-write-token-diff
-# Or manually: copy to .copilot/hooks/post-write-token-diff.sh
+# Or manually: copy to .github/hooks/post-write-token-diff.sh
 #
 # CONFIGURE (optional):
 #   CPTO_WRITE_ADVISORY_TOKENS — cumulative threshold for advisory (default: 5000)
 
-LOG_FILE=".copilot/sessions/write-log.md"
+LOG_FILE=".github/sessions/write-log.md"
 ADVISORY_THRESHOLD="${CPTO_WRITE_ADVISORY_TOKENS:-5000}"
 DATE=$(date +%Y-%m-%d)
 TIME=$(date +%H:%M)

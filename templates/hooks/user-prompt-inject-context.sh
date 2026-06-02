@@ -8,7 +8,7 @@
 # sees before answering — zero token cost when the file isn't relevant.
 #
 # INSTALL: cpto hooks install user-prompt-inject-context
-# Or manually: copy to .copilot/hooks/user-prompt-inject-context.sh
+# Or manually: copy to .github/hooks/user-prompt-inject-context.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_LEARNINGS_DIR    — path to learnings dir (default: docs/learnings)

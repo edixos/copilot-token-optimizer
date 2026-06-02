@@ -3,24 +3,24 @@
 # EVENT: UserPromptSubmit
 # DESCRIPTION: Inject the previous session snapshot into Copilot's context on first prompt
 #
-# GitHub Copilot UserPromptSubmit hook: reads .copilot/sessions/snapshot.md (written
+# GitHub Copilot UserPromptSubmit hook: reads .github/sessions/snapshot.md (written
 # by stop-session-snapshot.sh) and injects it as context Copilot sees before
 # answering the first prompt of each session. Zero overhead on subsequent prompts.
 #
 # INSTALL: cpto hooks install user-prompt-inject-snapshot
-# Or manually: copy to .copilot/hooks/user-prompt-inject-snapshot.sh
+# Or manually: copy to .github/hooks/user-prompt-inject-snapshot.sh
 #
 # DEPENDS ON: stop-session-snapshot.sh (must be installed for snapshot to exist)
 
-SNAPSHOT=".copilot/sessions/snapshot.md"
-MARKER=".copilot/sessions/.snapshot-injected-$(date +%Y-%m-%d)"
+SNAPSHOT=".github/sessions/snapshot.md"
+MARKER=".github/sessions/.snapshot-injected-$(date +%Y-%m-%d)"
 
 # Only inject once per session day
 if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-mkdir -p ".copilot/sessions"
+mkdir -p ".github/sessions"
 touch "$MARKER"
 
 # No snapshot yet — silent exit (first-ever session or hooks just installed)
@@ -54,7 +54,7 @@ else
   echo "$SNAPSHOT_CONTENT"
   echo "--- End snapshot ---"
   echo ""
-  echo "💡 Session snapshot injected from .copilot/sessions/snapshot.md" >&2
+  echo "💡 Session snapshot injected from .github/sessions/snapshot.md" >&2
 fi
 
 exit 0

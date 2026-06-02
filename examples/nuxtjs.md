@@ -929,7 +929,7 @@ config.databaseUrl
 my-nuxt-app/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Nuxt-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Nuxt structure)
@@ -961,9 +961,9 @@ my-nuxt-app/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For data fetching, load:
 docs/learnings/data-fetching.md (~600 tokens)

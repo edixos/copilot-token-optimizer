@@ -930,7 +930,7 @@ rails credentials:edit
 my-rails-app/
 ├── .github/copilot-instructions.md
 ├── .copilotignore
-├── .copilot/
+├── .github/
 │   ├── COMMON_MISTAKES.md (Rails-specific)
 │   ├── QUICK_START.md
 │   ├── ARCHITECTURE_MAP.md (Rails structure)
@@ -968,9 +968,9 @@ my-rails-app/
 ```bash
 # 1. Load essential docs (~800 tokens)
 .github/copilot-instructions.md
-.copilot/COMMON_MISTAKES.md
-.copilot/QUICK_START.md
-.copilot/ARCHITECTURE_MAP.md
+.github/COMMON_MISTAKES.md
+.github/QUICK_START.md
+.github/ARCHITECTURE_MAP.md
 
 # 2. For model work, load:
 docs/learnings/active-record-patterns.md (~700 tokens)

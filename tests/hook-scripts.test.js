@@ -95,7 +95,7 @@ describe('notification-token-display', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-notif-'));
     fs.mkdirSync(path.join(tmpDir, '.github'), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.copilot', 'sessions'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.github', 'sessions'), { recursive: true });
     // Create a minimal .github/copilot-instructions.md so token count is non-zero
     fs.writeFileSync(path.join(tmpDir, '.github/copilot-instructions.md'), 'This is a test project. '.repeat(50));
   });
@@ -113,7 +113,7 @@ describe('notification-token-display', () => {
 
   it('exits silently on second notification same day', () => {
     const today = execSync('date +%Y-%m-%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.copilot', 'sessions', `.notification-shown-${today}`);
+    const marker = path.join(tmpDir, '.github', 'sessions', `.notification-shown-${today}`);
     fs.writeFileSync(marker, '');
 
     const r = runHook(SCRIPT, { message: 'Another notification' }, {}, tmpDir);
@@ -123,7 +123,7 @@ describe('notification-token-display', () => {
 
   it('creates session marker after first notification', () => {
     const today = execSync('date +%Y-%m-%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.copilot', 'sessions', `.notification-shown-${today}`);
+    const marker = path.join(tmpDir, '.github', 'sessions', `.notification-shown-${today}`);
     assert.ok(!fs.existsSync(marker), 'marker should not exist before');
     runHook(SCRIPT, { message: 'test' }, {}, tmpDir);
     assert.ok(fs.existsSync(marker), 'marker should exist after first notification');
@@ -139,7 +139,7 @@ describe('user-prompt-ghost-scanner', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-ghost-'));
     fs.mkdirSync(path.join(tmpDir, '.github'), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.copilot', 'sessions'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.github', 'sessions'), { recursive: true });
   });
 
   afterEach(() => {
@@ -148,7 +148,7 @@ describe('user-prompt-ghost-scanner', () => {
 
   function writeLog(entries) {
     const content = entries.map((e, i) => `## Session ${i + 1}\n\n${e}\n`).join('\n');
-    fs.writeFileSync(path.join(tmpDir, '.copilot', 'sessions', 'token-log.md'), content);
+    fs.writeFileSync(path.join(tmpDir, '.github', 'sessions', 'token-log.md'), content);
   }
 
   function writeCopilotMd(content) {
@@ -192,7 +192,7 @@ describe('user-prompt-ghost-scanner', () => {
 
   it('exits silently on second run same day (marker file)', () => {
     const today = execSync('date +%Y%m%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.copilot', 'sessions', `.ghost-checked-${today}`);
+    const marker = path.join(tmpDir, '.github', 'sessions', `.ghost-checked-${today}`);
     fs.writeFileSync(marker, '');
     const sessions = Array.from({ length: 6 }, () => 'no relevant content here');
     writeLog(sessions);

@@ -7,7 +7,7 @@ Get a Copilot-friendly documentation layout in a few minutes.
 ## Fastest Path
 
 ```bash
-npx copilot-token-optimizer init
+npx @edixos/copilot-token-optimizer init
 ```
 
 Or install globally:
@@ -32,18 +32,18 @@ This estimates the documentation footprint of the files most likely to end up in
 After `init`, update these files first:
 
 1. `.github/copilot-instructions.md`
-2. `.copilot/COMMON_MISTAKES.md`
-3. `.copilot/QUICK_START.md`
-4. `.copilot/ARCHITECTURE_MAP.md`
+2. `.github/COMMON_MISTAKES.md`
+3. `.github/QUICK_START.md`
+4. `.github/ARCHITECTURE_MAP.md`
 
 ## Recommended Working Set
 
 Keep the default Copilot working set to these files:
 
 - `.github/copilot-instructions.md`
-- `.copilot/COMMON_MISTAKES.md`
-- `.copilot/QUICK_START.md`
-- `.copilot/ARCHITECTURE_MAP.md`
+- `.github/COMMON_MISTAKES.md`
+- `.github/QUICK_START.md`
+- `.github/ARCHITECTURE_MAP.md`
 
 Then pull in topic docs from `docs/learnings/` only when the task needs them.
 
@@ -92,8 +92,8 @@ If you prefer to have Copilot create the structure from a chat prompt instead of
 
 ## Next Steps
 
-1. Add real commands to `.copilot/QUICK_START.md`.
-2. Add real architectural landmarks to `.copilot/ARCHITECTURE_MAP.md`.
-3. Add your top five repeat mistakes to `.copilot/COMMON_MISTAKES.md`.
+1. Add real commands to `.github/QUICK_START.md`.
+2. Add real architectural landmarks to `.github/ARCHITECTURE_MAP.md`.
+3. Add your top five repeat mistakes to `.github/COMMON_MISTAKES.md`.
 4. Move long-form knowledge into `docs/learnings/`.
 5. Run `cpto compress` and `cpto prune` whenever `.github/copilot-instructions.md` starts to sprawl.

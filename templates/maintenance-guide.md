@@ -8,20 +8,20 @@
 
 ### Every Session:
 1. **Load these 3 files** (~800 tokens):
-   - `.copilot/COMMON_MISTAKES.md` ⚠️ CRITICAL
-   - `.copilot/QUICK_START.md`
-   - `.copilot/ARCHITECTURE_MAP.md`
+   - `.github/COMMON_MISTAKES.md` ⚠️ CRITICAL
+   - `.github/QUICK_START.md`
+   - `.github/ARCHITECTURE_MAP.md`
 
 2. **Optional** (if complex task):
-   - Create session file in `.copilot/sessions/active/YYYY-MM-DD-session-N.md`
-   - Use template: `.copilot/templates/session-template.md`
+   - Create session file in `.github/sessions/active/YYYY-MM-DD-session-N.md`
+   - Use template: `.github/templates/session-template.md`
 
 3. **Load task-specific docs** (as needed):
    - See `docs/INDEX.md` for navigation
 
 ### Never Auto-Load:
-- ❌ `.copilot/completions/**` (0 token cost)
-- ❌ `.copilot/sessions/**` (0 token cost)
+- ❌ `.github/completions/**` (0 token cost)
+- ❌ `.github/sessions/**` (0 token cost)
 - ❌ `docs/archive/**` (0 token cost)
 
 ---
@@ -31,13 +31,13 @@
 ### At End of Every Task:
 
 1. **Create completion doc**:
-   - Location: `.copilot/completions/YYYY-MM-DD-task-name.md`
-   - Template: `.copilot/templates/completion-template.md`
+   - Location: `.github/completions/YYYY-MM-DD-task-name.md`
+   - Template: `.github/templates/completion-template.md`
    - Include: Changes, commits, learnings, testing
 
 2. **Move session file** (if created):
-   - From: `.copilot/sessions/active/`
-   - To: `.copilot/sessions/archive/`
+   - From: `.github/sessions/active/`
+   - To: `.github/sessions/archive/`
 
 3. **Update docs if needed** (see "When to Update Docs" below)
 
@@ -61,7 +61,7 @@
 - Missed mutation in transaction → Added to database section
 
 ### Update Process:
-1. Add to appropriate section in `.copilot/COMMON_MISTAKES.md`
+1. Add to appropriate section in `.github/COMMON_MISTAKES.md`
 2. Include:
    - **Symptom**: How you discover the error
    - **Anti-pattern**: Wrong code example
@@ -108,7 +108,7 @@
 **Superseded Docs**:
 - ✅ Old versions of guides (when rewritten)
 - ✅ Status docs replaced by feature memory docs
-- ✅ Session summaries (move to `.copilot/sessions/archive/`)
+- ✅ Session summaries (move to `.github/sessions/archive/`)
 - **Action**: Move to appropriate archive folder with README update
 
 **Meta Documentation**:
@@ -168,7 +168,7 @@
    ```
 3. Update `docs/INDEX.md` with navigation entry and token estimate
 4. Add cross-references in related topic files
-5. Update `.copilot/LEARNINGS_INDEX.md` with pointer
+5. Update `.github/LEARNINGS_INDEX.md` with pointer
 
 ---
 
@@ -220,7 +220,7 @@
 ## Maintenance Checklist
 
 ### Weekly (User-Driven):
-- [ ] Review `.copilot/sessions/active/` - archive completed sessions
+- [ ] Review `.github/sessions/active/` - archive completed sessions
 - [ ] Check if any planning docs can be archived
 - [ ] Review `docs/learnings/*.md` - any files >1,000 lines to split?
 
@@ -234,7 +234,7 @@
 ### Monthly (User-Driven):
 - [ ] Review `docs/archive/README.md` - is it up to date?
 - [ ] Check token estimates in `docs/INDEX.md` - still accurate?
-- [ ] Review `.copilot/completions/` - good coverage of major tasks?
+- [ ] Review `.github/completions/` - good coverage of major tasks?
 
 ---
 
@@ -244,19 +244,19 @@
 
 ```
 Did I discover a CRITICAL mistake?
-  └─ YES → Update .copilot/COMMON_MISTAKES.md
+  └─ YES → Update .github/COMMON_MISTAKES.md
 
 Did I learn a reusable pattern?
   └─ YES → Update docs/learnings/[topic].md
 
 Did I complete a task?
-  └─ YES → Create .copilot/completions/YYYY-MM-DD-task.md
+  └─ YES → Create .github/completions/YYYY-MM-DD-task.md
 
 Did I implement a planned feature?
   └─ YES → Archive the planning doc
 
 Is this doc superseded?
-  └─ YES → Archive to docs/archive/ or .copilot/sessions/archive/
+  └─ YES → Archive to docs/archive/ or .github/sessions/archive/
 
 Is this a quick bug fix?
   └─ NO completion doc needed (unless non-obvious)
@@ -272,7 +272,7 @@ Is this a quick bug fix?
 
 **Actions**:
 1. ✅ Fix the bug
-2. ✅ Update `.copilot/COMMON_MISTAKES.md` → "Queue Jobs" section
+2. ✅ Update `.github/COMMON_MISTAKES.md` → "Queue Jobs" section
 3. ✅ Update `docs/learnings/queue-system.md` → Add registration pattern
 4. ✅ Create completion doc if task took >15 minutes
 5. ❌ Don't archive anything (no planning docs involved)
@@ -282,13 +282,13 @@ Is this a quick bug fix?
 **Task**: Full-stack feature from planning doc
 
 **Actions**:
-1. ✅ Create completion doc: `.copilot/completions/2025-11-10-scheduled-posts.md`
+1. ✅ Create completion doc: `.github/completions/2025-11-10-scheduled-posts.md`
 2. ✅ Archive planning doc: `docs/archive/SCHEDULED_POSTS_PLAN.md`
 3. ✅ Update `docs/archive/README.md` with reason
 4. ✅ Create feature memory doc: `docs/SCHEDULED_POSTS_MEMORY.md`
 5. ✅ Update `docs/INDEX.md` navigation
-6. ✅ Add any critical mistakes to `.copilot/COMMON_MISTAKES.md`
-7. ✅ Move session file to `.copilot/sessions/archive/`
+6. ✅ Add any critical mistakes to `.github/COMMON_MISTAKES.md`
+7. ✅ Move session file to `.github/sessions/archive/`
 
 ### Example 3: Discovered Better Testing Pattern
 
@@ -296,7 +296,7 @@ Is this a quick bug fix?
 
 **Actions**:
 1. ✅ Update `docs/learnings/testing-patterns.md` → Add queue mocking pattern
-2. ✅ Update `.copilot/TESTING_METHODOLOGY.md` → Reference new pattern
+2. ✅ Update `.github/TESTING_METHODOLOGY.md` → Reference new pattern
 3. ✅ Update "Last Updated" dates
 4. ❌ Don't create completion doc (pattern discovery, not task completion)
 5. ❌ Don't archive anything
@@ -306,8 +306,8 @@ Is this a quick bug fix?
 **Task**: Optimize documentation structure for token savings
 
 **Actions**:
-1. ✅ Created completion doc: `.copilot/completions/2025-11-10-documentation-optimization.md`
-2. ✅ Archived 28 files to `docs/archive/` and `.copilot/sessions/archive/`
+1. ✅ Created completion doc: `.github/completions/2025-11-10-documentation-optimization.md`
+2. ✅ Archived 28 files to `docs/archive/` and `.github/sessions/archive/`
 3. ✅ Updated `docs/archive/README.md` with all archived files
 4. ✅ Created this maintenance guide
 5. ✅ Updated `.github/copilot-instructions.md` with reference to maintenance guide
@@ -318,8 +318,8 @@ Is this a quick bug fix?
 ## Anti-Patterns (Don't Do This)
 
 ### ❌ Don't Auto-Load Historical Files
-- Never load `.copilot/completions/**`
-- Never load `.copilot/sessions/**`
+- Never load `.github/completions/**`
+- Never load `.github/sessions/**`
 - Never load `docs/archive/**`
 - **Why**: Wastes tokens (0 token cost is the goal)
 

@@ -69,21 +69,21 @@ Reusable templates for documentation maintenance and task tracking.
 
 ### Completion Template
 
-1. **At task completion**: Copilot creates `.copilot/completions/YYYY-MM-DD-task-name.md`
+1. **At task completion**: Copilot creates `.github/completions/YYYY-MM-DD-task-name.md`
 2. **Uses template**: Fills in all sections with task details
 3. **Zero tokens**: Never auto-loaded (via .copilotignore)
 4. **Available**: Explicitly request to review past work
 
 **Example**:
 ```
-.copilot/completions/2025-11-10-add-authentication.md
-.copilot/completions/2025-11-11-fix-login-bug.md
-.copilot/completions/2025-11-12-optimize-queries.md
+.github/completions/2025-11-10-add-authentication.md
+.github/completions/2025-11-11-fix-login-bug.md
+.github/completions/2025-11-12-optimize-queries.md
 ```
 
 ### Maintenance Guide
 
-1. **At project setup**: Copy to `.copilot/DOCUMENTATION_MAINTENANCE.md`
+1. **At project setup**: Copy to `.github/DOCUMENTATION_MAINTENANCE.md`
 2. **Reference in .github/copilot-instructions.md**: Link from session start protocol
 3. **Load as needed**: When updating docs or making structural changes
 

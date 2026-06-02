@@ -37,7 +37,7 @@ function findCheck(results, labelFragment) {
   return results.find(r => r.label.includes(labelFragment));
 }
 
-const FULL_IGNORE = '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n.clinerules\n.roomodes\n';
+const FULL_IGNORE = '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n.clinerules\n.roomodes\n';
 
 // ─── Unit: pure logic ────────────────────────────────────────────────────────
 
@@ -96,27 +96,27 @@ describe('unit — pure logic', () => {
 
   describe('checkIgnoreContent', () => {
     it('passes sessions coverage when present', () => {
-      const results = checkIgnoreContent('.copilot/sessions/**\n');
-      const r = findCheck(results, '.copilotignore covers .copilot/sessions/');
+      const results = checkIgnoreContent('.cpto/sessions/**\n');
+      const r = findCheck(results, '.copilotignore covers .cpto/sessions/');
       assert.strictEqual(r.pass, true);
     });
 
     it('fails sessions coverage when absent', () => {
       const results = checkIgnoreContent('node_modules/**\n');
-      const r = findCheck(results, '.copilotignore covers .copilot/sessions/');
+      const r = findCheck(results, '.copilotignore covers .cpto/sessions/');
       assert.strictEqual(r.pass, false);
       assert.strictEqual(r.severity, 'warning');
     });
 
     it('passes completions coverage when present', () => {
-      const results = checkIgnoreContent('.copilot/completions/**\n');
-      const r = findCheck(results, '.copilotignore covers .copilot/completions/');
+      const results = checkIgnoreContent('.cpto/completions/**\n');
+      const r = findCheck(results, '.copilotignore covers .cpto/completions/');
       assert.strictEqual(r.pass, true);
     });
 
     it('fails completions coverage when absent', () => {
-      const results = checkIgnoreContent('.copilot/sessions/**\n');
-      const r = findCheck(results, '.copilotignore covers .copilot/completions/');
+      const results = checkIgnoreContent('.cpto/sessions/**\n');
+      const r = findCheck(results, '.copilotignore covers .cpto/completions/');
       assert.strictEqual(r.pass, false);
       assert.strictEqual(r.severity, 'warning');
     });
@@ -128,7 +128,7 @@ describe('unit — pure logic', () => {
     });
 
     it('fails archive coverage when absent', () => {
-      const results = checkIgnoreContent('.copilot/sessions/**\n.copilot/completions/**\n');
+      const results = checkIgnoreContent('.cpto/sessions/**\n.cpto/completions/**\n');
       const r = findCheck(results, 'copilotignore covers docs/archive/');
       assert.strictEqual(r.pass, false);
       assert.strictEqual(r.severity, 'warning');
@@ -141,7 +141,7 @@ describe('unit — pure logic', () => {
     });
 
     it('fails README.md coverage when absent', () => {
-      const results = checkIgnoreContent('.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      const results = checkIgnoreContent('.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const r = findCheck(results, 'copilotignore covers README.md');
       assert.strictEqual(r.pass, false);
       assert.strictEqual(r.severity, 'info');
@@ -337,7 +337,7 @@ describe('integration — filesystem', () => {
 
     it('passes .copilotignore check when file present', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, '.copilotignore present');
       assert.strictEqual(r.pass, true);
@@ -354,32 +354,32 @@ describe('integration — filesystem', () => {
 
     it('passes sessions coverage when .copilotignore includes sessions path', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n');
       const results = runAudit(tmpDir);
-      const r = findCheck(results, '.copilotignore covers .copilot/sessions/');
+      const r = findCheck(results, '.copilotignore covers .cpto/sessions/');
       assert.strictEqual(r.pass, true);
     });
 
     it('warns when .copilotignore does not cover completions', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n');
       const results = runAudit(tmpDir);
-      const r = findCheck(results, '.copilotignore covers .copilot/completions/');
+      const r = findCheck(results, '.copilotignore covers .cpto/completions/');
       assert.strictEqual(r.pass, false);
       assert.strictEqual(r.severity, 'warning');
     });
 
     it('passes completions coverage when .copilotignore includes completions path', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const results = runAudit(tmpDir);
-      const r = findCheck(results, '.copilotignore covers .copilot/completions/');
+      const r = findCheck(results, '.copilotignore covers .cpto/completions/');
       assert.strictEqual(r.pass, true);
     });
 
     it('warns when .copilotignore does not cover docs/archive', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers docs/archive/');
       assert.strictEqual(r.pass, false);
@@ -388,7 +388,7 @@ describe('integration — filesystem', () => {
 
     it('passes archive coverage when .copilotignore includes archive path', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers docs/archive/');
       assert.strictEqual(r.pass, true);
@@ -396,7 +396,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when README.md not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers README.md');
       assert.strictEqual(r.pass, false);
@@ -413,7 +413,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when CHANGELOG.md not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers CHANGELOG.md');
       assert.ok(r, 'should have CHANGELOG check');
@@ -431,7 +431,7 @@ describe('integration — filesystem', () => {
 
     it('info when CONTRIBUTING.md not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers CONTRIBUTING.md');
       assert.ok(r, 'should have CONTRIBUTING.md check');
@@ -449,7 +449,7 @@ describe('integration — filesystem', () => {
 
     it('info when GEMINI.md not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers GEMINI.md');
       assert.ok(r, 'should have GEMINI.md check');
@@ -467,7 +467,7 @@ describe('integration — filesystem', () => {
 
     it('info when AGENTS.md not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers AGENTS.md');
       assert.ok(r, 'should have AGENTS.md check');
@@ -485,7 +485,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when .cursorrules not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers .cursorrules');
       assert.ok(r, 'should have .cursorrules check');
@@ -503,7 +503,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when .windsurfrules not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers .windsurfrules');
       assert.ok(r, 'should have .windsurfrules check');
@@ -521,7 +521,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when .clinerules not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers .clinerules');
       assert.ok(r, 'should have .clinerules check');
@@ -539,7 +539,7 @@ describe('integration — filesystem', () => {
 
     it('info warn when .roomodes not in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n.clinerules\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n.cursorrules\n.windsurfrules\n.clinerules\n');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'copilotignore covers .roomodes');
       assert.ok(r, 'should have .roomodes check');
@@ -565,9 +565,9 @@ describe('integration — filesystem', () => {
 
     it('passes essential files when all 3 present', () => {
       writeFile('.github/copilot-instructions.md', 'Short.');
-      writeFile('.copilot/COMMON_MISTAKES.md', 'content');
-      writeFile('.copilot/QUICK_START.md', 'content');
-      writeFile('.copilot/ARCHITECTURE_MAP.md', 'content');
+      writeFile('.cpto/COMMON_MISTAKES.md', 'content');
+      writeFile('.cpto/QUICK_START.md', 'content');
+      writeFile('.cpto/ARCHITECTURE_MAP.md', 'content');
       const results = runAudit(tmpDir);
       const r = findCheck(results, 'Essential files present (3/3)');
       assert.strictEqual(r.pass, true);
@@ -593,7 +593,7 @@ describe('integration — filesystem', () => {
   describe('summary filtering', () => {
     it('info-only failures: no errors, no warnings, but infos > 0', () => {
       writeFile('.github/copilot-instructions.md', 'Short content.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const results = runAudit(tmpDir);
       const { errors, warnings, infos } = summarizeCounts(results);
       assert.strictEqual(errors, 0, 'no errors expected');
@@ -604,9 +604,9 @@ describe('integration — filesystem', () => {
     it('all checks pass when all files present and clean', () => {
       writeFile('.github/copilot-instructions.md', 'Short content.');
       writeFile('.copilotignore', FULL_IGNORE);
-      writeFile('.copilot/COMMON_MISTAKES.md', 'content');
-      writeFile('.copilot/QUICK_START.md', 'content');
-      writeFile('.copilot/ARCHITECTURE_MAP.md', 'content');
+      writeFile('.cpto/COMMON_MISTAKES.md', 'content');
+      writeFile('.cpto/QUICK_START.md', 'content');
+      writeFile('.cpto/ARCHITECTURE_MAP.md', 'content');
       writeFile('docs/INDEX.md', 'content');
       const results = runAudit(tmpDir);
       const failures = results.filter(r => !r.pass);
@@ -617,7 +617,7 @@ describe('integration — filesystem', () => {
   describe('json output fields', () => {
     it('infos count matches info-level failures', () => {
       writeFile('.github/copilot-instructions.md', 'Short content.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n');
       const results = runAudit(tmpDir);
       const infos = results.filter(r => !r.pass && r.severity === 'info');
       assert.ok(infos.length > 0, 'precondition: should have info failures');
@@ -627,9 +627,9 @@ describe('integration — filesystem', () => {
     it('infos count is 0 when all files present', () => {
       writeFile('.github/copilot-instructions.md', 'Short content.');
       writeFile('.copilotignore', FULL_IGNORE);
-      writeFile('.copilot/COMMON_MISTAKES.md', 'content');
-      writeFile('.copilot/QUICK_START.md', 'content');
-      writeFile('.copilot/ARCHITECTURE_MAP.md', 'content');
+      writeFile('.cpto/COMMON_MISTAKES.md', 'content');
+      writeFile('.cpto/QUICK_START.md', 'content');
+      writeFile('.cpto/ARCHITECTURE_MAP.md', 'content');
       writeFile('docs/INDEX.md', 'content');
       const results = runAudit(tmpDir);
       const infos = results.filter(r => !r.pass && r.severity === 'info');
@@ -638,7 +638,7 @@ describe('integration — filesystem', () => {
 
     it('errors, warnings, infos are mutually exclusive categories', () => {
       writeFile('.github/copilot-instructions.md', 'Short content.');
-      writeFile('.copilotignore', '.copilot/sessions/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n');
       const results = runAudit(tmpDir);
       const { errors, warnings, infos } = summarizeCounts(results);
       const total = errors + warnings + infos;
@@ -663,7 +663,7 @@ describe('integration — filesystem', () => {
     it('creates all 3 essential files when missing', () => {
       const results = runAudit(tmpDir);
       applyFixes(tmpDir, results);
-      for (const f of ['.copilot/COMMON_MISTAKES.md', '.copilot/QUICK_START.md', '.copilot/ARCHITECTURE_MAP.md']) {
+      for (const f of ['.cpto/COMMON_MISTAKES.md', '.cpto/QUICK_START.md', '.cpto/ARCHITECTURE_MAP.md']) {
         assert.ok(fs.existsSync(path.join(tmpDir, f)), `${f} should be created`);
       }
     });
@@ -700,9 +700,9 @@ describe('integration — filesystem', () => {
     it('returns empty array when nothing to fix', () => {
       writeFile('.github/copilot-instructions.md', 'content');
       writeFile('.copilotignore', FULL_IGNORE);
-      writeFile('.copilot/COMMON_MISTAKES.md', 'content');
-      writeFile('.copilot/QUICK_START.md', 'content');
-      writeFile('.copilot/ARCHITECTURE_MAP.md', 'content');
+      writeFile('.cpto/COMMON_MISTAKES.md', 'content');
+      writeFile('.cpto/QUICK_START.md', 'content');
+      writeFile('.cpto/ARCHITECTURE_MAP.md', 'content');
       writeFile('docs/INDEX.md', 'content');
       const results = runAudit(tmpDir);
       const created = applyFixes(tmpDir, results);
@@ -711,7 +711,7 @@ describe('integration — filesystem', () => {
 
     it('--fix appends README.md to .copilotignore when missing', () => {
       writeFile('.github/copilot-instructions.md', 'content');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\ndocs/archive/**\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\ndocs/archive/**\n');
       const created = applyFixes(tmpDir, runAudit(tmpDir));
       assert.ok(created.some(c => c.includes('.copilotignore')), 'should report .copilotignore modified');
       const content = fs.readFileSync(path.join(tmpDir, '.copilotignore'), 'utf8');
@@ -721,9 +721,9 @@ describe('integration — filesystem', () => {
     it('--fix does not duplicate README.md if already in .copilotignore', () => {
       writeFile('.github/copilot-instructions.md', 'content');
       writeFile('.copilotignore', FULL_IGNORE);
-      writeFile('.copilot/COMMON_MISTAKES.md', 'content');
-      writeFile('.copilot/QUICK_START.md', 'content');
-      writeFile('.copilot/ARCHITECTURE_MAP.md', 'content');
+      writeFile('.cpto/COMMON_MISTAKES.md', 'content');
+      writeFile('.cpto/QUICK_START.md', 'content');
+      writeFile('.cpto/ARCHITECTURE_MAP.md', 'content');
       writeFile('docs/INDEX.md', 'content');
       const created = applyFixes(tmpDir, runAudit(tmpDir));
       assert.ok(!created.some(c => c.includes('.copilotignore')), 'should not modify already-correct .copilotignore');
@@ -731,27 +731,27 @@ describe('integration — filesystem', () => {
       assert.strictEqual(lines.length, 1, 'README.md should appear exactly once');
     });
 
-    it('--fix appends .copilot/sessions/** when missing', () => {
+    it('--fix appends .cpto/sessions/** when missing', () => {
       writeFile('.github/copilot-instructions.md', 'content');
-      writeFile('.copilotignore', '.copilot/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
+      writeFile('.copilotignore', '.cpto/completions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
       const created = applyFixes(tmpDir, runAudit(tmpDir));
       assert.ok(created.some(c => c.includes('sessions')), 'should report sessions added');
       const content = fs.readFileSync(path.join(tmpDir, '.copilotignore'), 'utf8');
-      assert.ok(content.includes('.copilot/sessions/**'));
+      assert.ok(content.includes('.cpto/sessions/**'));
     });
 
-    it('--fix appends .copilot/completions/** when missing', () => {
+    it('--fix appends .cpto/completions/** when missing', () => {
       writeFile('.github/copilot-instructions.md', 'content');
-      writeFile('.copilotignore', '.copilot/sessions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\ndocs/archive/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
       const created = applyFixes(tmpDir, runAudit(tmpDir));
       assert.ok(created.some(c => c.includes('completions')), 'should report completions added');
       const content = fs.readFileSync(path.join(tmpDir, '.copilotignore'), 'utf8');
-      assert.ok(content.includes('.copilot/completions/**'));
+      assert.ok(content.includes('.cpto/completions/**'));
     });
 
     it('--fix appends docs/archive/** when missing', () => {
       writeFile('.github/copilot-instructions.md', 'content');
-      writeFile('.copilotignore', '.copilot/sessions/**\n.copilot/completions/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
+      writeFile('.copilotignore', '.cpto/sessions/**\n.cpto/completions/**\nREADME.md\nCHANGELOG.md\nCONTRIBUTING.md\nGEMINI.md\nAGENTS.md\n');
       const created = applyFixes(tmpDir, runAudit(tmpDir));
       assert.ok(created.some(c => c.includes('archive')), 'should report archive added');
       const content = fs.readFileSync(path.join(tmpDir, '.copilotignore'), 'utf8');
@@ -773,10 +773,10 @@ describe('e2e — subprocess', () => {
       fs.mkdirSync(path.join(tmp, '.github'), { recursive: true });
       fs.writeFileSync(path.join(tmp, '.github/copilot-instructions.md'), 'Short content.');
       fs.writeFileSync(path.join(tmp, '.copilotignore'), FULL_IGNORE);
-      fs.mkdirSync(path.join(tmp, '.copilot'), { recursive: true });
-      fs.writeFileSync(path.join(tmp, '.copilot/COMMON_MISTAKES.md'), 'content');
-      fs.writeFileSync(path.join(tmp, '.copilot/QUICK_START.md'), 'content');
-      fs.writeFileSync(path.join(tmp, '.copilot/ARCHITECTURE_MAP.md'), 'content');
+      fs.mkdirSync(path.join(tmp, '.cpto'), { recursive: true });
+      fs.writeFileSync(path.join(tmp, '.cpto/COMMON_MISTAKES.md'), 'content');
+      fs.writeFileSync(path.join(tmp, '.cpto/QUICK_START.md'), 'content');
+      fs.writeFileSync(path.join(tmp, '.cpto/ARCHITECTURE_MAP.md'), 'content');
       fs.mkdirSync(path.join(tmp, 'docs'), { recursive: true });
       fs.writeFileSync(path.join(tmp, 'docs/INDEX.md'), 'content');
       const result = spawnSync('node', [binPath, 'audit'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });
@@ -809,10 +809,10 @@ describe('e2e — subprocess', () => {
       fs.mkdirSync(path.join(tmp, '.github'), { recursive: true });
       fs.writeFileSync(path.join(tmp, '.github/copilot-instructions.md'), 'Short content.');
       fs.writeFileSync(path.join(tmp, '.copilotignore'), FULL_IGNORE);
-      fs.mkdirSync(path.join(tmp, '.copilot'), { recursive: true });
-      fs.writeFileSync(path.join(tmp, '.copilot/COMMON_MISTAKES.md'), 'content');
-      fs.writeFileSync(path.join(tmp, '.copilot/QUICK_START.md'), 'content');
-      fs.writeFileSync(path.join(tmp, '.copilot/ARCHITECTURE_MAP.md'), 'content');
+      fs.mkdirSync(path.join(tmp, '.cpto'), { recursive: true });
+      fs.writeFileSync(path.join(tmp, '.cpto/COMMON_MISTAKES.md'), 'content');
+      fs.writeFileSync(path.join(tmp, '.cpto/QUICK_START.md'), 'content');
+      fs.writeFileSync(path.join(tmp, '.cpto/ARCHITECTURE_MAP.md'), 'content');
       fs.mkdirSync(path.join(tmp, 'docs'), { recursive: true });
       fs.writeFileSync(path.join(tmp, 'docs/INDEX.md'), 'content');
       const result = spawnSync('node', [binPath, 'audit', '--json'], { cwd: tmp, encoding: 'utf8', timeout: 10000 });

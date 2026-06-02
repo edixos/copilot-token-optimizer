@@ -17,7 +17,7 @@ You are GitHub Copilot working inside this repository. Create a documentation la
 ## Goals
 
 1. Keep `.github/copilot-instructions.md` concise and under 200 lines.
-2. Move durable high-signal knowledge into `.copilot/`.
+2. Move durable high-signal knowledge into `.github/`.
 3. Move deep-dive topics into `docs/learnings/`.
 4. Keep historical material in places that are never part of the default working set.
 5. Include token estimates and navigation hints so future Copilot sessions stay lean.
@@ -29,10 +29,10 @@ You are GitHub Copilot working inside this repository. Create a documentation la
 - `.github/copilot-instructions.md`
 - `.copilotignore`
 
-### `.copilot/`
+### `.github/`
 
 ```text
-.copilot/
+.github/
 ├── COMMON_MISTAKES.md
 ├── QUICK_START.md
 ├── ARCHITECTURE_MAP.md
@@ -68,11 +68,11 @@ Make this the always-on summary for Copilot. It should include:
 - where to find deep-dive docs
 - a rule to avoid loading archives, session logs, and completed-task notes by default
 
-### `.copilot/COMMON_MISTAKES.md`
+### `.cpto/COMMON_MISTAKES.md`
 
 Include the top five high-cost mistakes for this stack. Focus on bugs that are expensive, recurrent, or framework-specific.
 
-### `.copilot/QUICK_START.md`
+### `.cpto/QUICK_START.md`
 
 Include:
 
@@ -82,7 +82,7 @@ Include:
 - database or migration commands if relevant
 - common local workflows
 
-### `.copilot/ARCHITECTURE_MAP.md`
+### `.cpto/ARCHITECTURE_MAP.md`
 
 Include:
 
@@ -116,8 +116,8 @@ Create 3 to 6 topic files that fit the project. Likely topics:
 
 Create `.copilotignore` with rules that exclude:
 
-- `.copilot/completions/**`
-- `.copilot/sessions/**`
+- `.github/completions/**`
+- `.github/sessions/**`
 - `docs/archive/**`
 - dependency folders
 - logs
@@ -130,7 +130,7 @@ Document these rules clearly:
 
 - Keep the default Copilot working set around 800 tokens.
 - Treat `.github/copilot-instructions.md` as the startup summary.
-- Consult `.copilot/COMMON_MISTAKES.md`, `.copilot/QUICK_START.md`, and `.copilot/ARCHITECTURE_MAP.md` before non-trivial edits.
+- Consult `.github/COMMON_MISTAKES.md`, `.github/QUICK_START.md`, and `.github/ARCHITECTURE_MAP.md` before non-trivial edits.
 - Load topic files from `docs/learnings/` only when the current task needs them.
 - Never place long session journals or completed tasks in `.github/copilot-instructions.md`.
 
@@ -167,9 +167,9 @@ User: [Starts new GitHub Copilot session]
 
 Copilot: [Auto-loads only 4 files: ~800 tokens]
 1. .github/copilot-instructions.md
-2. .copilot/COMMON_MISTAKES.md
-3. .copilot/QUICK_START.md
-4. .copilot/ARCHITECTURE_MAP.md
+2. .cpto/COMMON_MISTAKES.md
+3. .cpto/QUICK_START.md
+4. .cpto/ARCHITECTURE_MAP.md
 
 Copilot: Ready! What would you like to work on?
 

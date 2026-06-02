@@ -116,7 +116,7 @@ describe('integration — filesystem', () => {
   before(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-watch-'));
     fs.mkdirSync(path.join(tmpDir, '.github'), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.copilot', 'sessions'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.cpto', 'sessions'), { recursive: true });
     fs.mkdirSync(path.join(tmpDir, 'docs'), { recursive: true });
   });
 
@@ -166,7 +166,8 @@ describe('integration — filesystem', () => {
 
   it('shows session writes section when write-log exists', () => {
     const logContent = `| writes | count | time |\n|--------|-------|------|\n| src/commands/init.js | 847 | 2 min ago |\n| tests/init.test.js | 312 | 3 min ago |\n`;
-    fs.writeFileSync(path.join(tmpDir, '.copilot', 'sessions', 'write-log.md'), logContent);
+    fs.mkdirSync(path.join(tmpDir, '.cpto', 'sessions'), { recursive: true });
+    fs.writeFileSync(path.join(tmpDir, '.cpto', 'sessions', 'write-log.md'), logContent);
     const out = buildWatchDisplay(tmpDir);
     assert.ok(out.includes('Session writes'), `expected session writes section: ${out}`);
   });

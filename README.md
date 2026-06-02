@@ -8,8 +8,8 @@ Cut your Copilot working-context footprint by up to 90% by keeping the always-on
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/edixos/copilot-token-optimizer?style=social)](https://github.com/edixos/copilot-token-optimizer/stargazers)
-[![npm version](https://img.shields.io/npm/v/copilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
-[![npm downloads](https://img.shields.io/npm/dm/copilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
+[![npm version](https://img.shields.io/npm/v/%40edixos%2Fcopilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
+[![npm downloads](https://img.shields.io/npm/dm/%40edixos%2Fcopilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
 
 </div>
 
@@ -23,10 +23,10 @@ In one real project, the documentation footprint had drifted to **11,000 tokens*
 
 ## The Solution
 
-`copilot-token-optimizer` keeps the working set small and intentional:
+`@edixos/copilot-token-optimizer` keeps the working set small and intentional:
 
 - One lean `.github/copilot-instructions.md` file for always-on guidance
-- Three high-signal core references in `.copilot/`
+- Three high-signal core references in `.github/`
 - Topic files in `docs/learnings/` that you pull in only when a task needs them
 - Historical material archived out of the default path
 
@@ -39,7 +39,7 @@ Token estimates use a GPT-family tokenizer so the numbers track modern Copilot m
 **Option A — no install:**
 
 ```bash
-npx copilot-token-optimizer init
+npx @edixos/copilot-token-optimizer init
 ```
 
 **Option B — one-line install with global `cpto`:**
@@ -59,7 +59,7 @@ cpto init
 Measure first if you want a before/after estimate:
 
 ```bash
-npx copilot-token-optimizer measure
+npx @edixos/copilot-token-optimizer measure
 # or
 cpto measure
 ```
@@ -69,15 +69,15 @@ cpto measure
 ```
 your-project/
 ├── .github/
-│   └── copilot-instructions.md   # Always-on project instructions
-├── .copilotignore                # Excludes archives and low-signal docs
-├── .copilot/
+│   ├── copilot-instructions.md   # Always-on project instructions
 │   ├── COMMON_MISTAKES.md        # Critical failure modes
 │   ├── QUICK_START.md            # Commands and daily workflows
 │   ├── ARCHITECTURE_MAP.md       # File and feature map
+│   ├── instructions/             # Path-specific *.instructions.md files
 │   ├── completions/              # Completed task notes
 │   ├── sessions/                 # Session logs and snapshots
 │   └── templates/                # Reusable doc templates
+├── .copilotignore                # Excludes archives and low-signal docs
 └── docs/
     ├── INDEX.md                  # Navigation + token guidance
     ├── learnings/                # Deep-dive topics, loaded on demand
@@ -92,9 +92,9 @@ The optimizer is built around one rule: keep the default Copilot context small, 
 
 ```text
 .github/copilot-instructions.md   ~450 tokens
-.copilot/COMMON_MISTAKES.md       ~350 tokens
-.copilot/QUICK_START.md           ~100 tokens
-.copilot/ARCHITECTURE_MAP.md      ~150 tokens
+.github/COMMON_MISTAKES.md       ~350 tokens
+.github/QUICK_START.md           ~100 tokens
+.github/ARCHITECTURE_MAP.md      ~150 tokens
 ---------------------------------------------
 Default working set               ~800 tokens
 ```
@@ -138,11 +138,11 @@ Framework-specific setup prompts live in [examples/README.md](examples/README.md
 ## Workflow After Setup
 
 1. Keep `.github/copilot-instructions.md` short. It should explain where deeper knowledge lives, not duplicate it.
-2. Put recurring mistakes in `.copilot/COMMON_MISTAKES.md`.
-3. Put commands and daily workflows in `.copilot/QUICK_START.md`.
-4. Put file layout and architectural landmarks in `.copilot/ARCHITECTURE_MAP.md`.
+2. Put recurring mistakes in `.github/COMMON_MISTAKES.md`.
+3. Put commands and daily workflows in `.github/QUICK_START.md`.
+4. Put file layout and architectural landmarks in `.github/ARCHITECTURE_MAP.md`.
 5. Move durable topic knowledge into `docs/learnings/`.
-6. Archive finished work into `.copilot/completions/`, `.copilot/sessions/archive/`, and `docs/archive/`.
+6. Archive finished work into `.github/completions/`, `.github/sessions/archive/`, and `docs/archive/`.
 
 ## CLI Reference
 
@@ -176,12 +176,12 @@ cpto audit --json
 Without a global install:
 
 ```bash
-npx copilot-token-optimizer audit --json
+npx @edixos/copilot-token-optimizer audit --json
 ```
 
 ## Helper Scripts
 
-GitHub Copilot does **not** expose a native CLI hook settings file. Instead, `cpto hooks` installs optional helper scripts into `.copilot/hooks/` and prints a JSON manifest you can wire into VS Code tasks, shell wrappers, or CI.
+GitHub Copilot does **not** expose a native CLI hook settings file. Instead, `cpto hooks` installs optional helper scripts into `.github/hooks/` and prints a JSON manifest you can wire into VS Code tasks, shell wrappers, or CI.
 
 ### Available Templates
 
@@ -209,7 +209,7 @@ cpto hooks install --all
 cpto hooks settings
 ```
 
-The `settings` command prints a machine-readable manifest of installed scripts and the `bash .copilot/hooks/...` command to run for each event group.
+The `settings` command prints a machine-readable manifest of installed scripts and the `bash .github/hooks/...` command to run for each event group.
 
 ### Useful Helper Scripts
 

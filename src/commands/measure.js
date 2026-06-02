@@ -4,14 +4,21 @@ import path from 'node:path';
 import { scanAutoLoadFiles } from '../lib/scanner.js';
 import { countTokens } from '../lib/tokenizer.js';
 import { buildCopilotMd, buildCommonMistakesMd, buildQuickStartMd, buildArchitectureMapMd, buildDocsIndexMd } from './init.js';
+import {
+  ARCHITECTURE_MAP_PATH,
+  COMMON_MISTAKES_PATH,
+  COPILOT_MD_PATH,
+  DOCS_INDEX_PATH,
+  QUICK_START_PATH,
+} from '../lib/paths.js';
 
 export function buildAfterFiles(date) {
   return [
-    { label: '.github/copilot-instructions.md', content: buildCopilotMd('Application', 'Your stack', 'See README', date) },
-    { label: '.copilot/COMMON_MISTAKES.md', content: buildCommonMistakesMd(date) },
-    { label: '.copilot/QUICK_START.md', content: buildQuickStartMd(date) },
-    { label: '.copilot/ARCHITECTURE_MAP.md', content: buildArchitectureMapMd(date) },
-    { label: 'docs/INDEX.md', content: buildDocsIndexMd(date) },
+    { label: COPILOT_MD_PATH, content: buildCopilotMd('Application', 'Your stack', 'See README', date) },
+    { label: COMMON_MISTAKES_PATH, content: buildCommonMistakesMd(date) },
+    { label: QUICK_START_PATH, content: buildQuickStartMd(date) },
+    { label: ARCHITECTURE_MAP_PATH, content: buildArchitectureMapMd(date) },
+    { label: DOCS_INDEX_PATH, content: buildDocsIndexMd(date) },
   ].map(f => ({ label: f.label, tokens: countTokens(f.content) }));
 }
 
@@ -71,7 +78,7 @@ export async function buildReport(dir) {
 
 export async function runMeasure(dir) {
   const report = await buildReport(dir);
-  const isInitialized = fs.existsSync(path.join(dir, '.github/copilot-instructions.md'));
+  const isInitialized = fs.existsSync(path.join(dir, COPILOT_MD_PATH));
   const lines = formatMeasureReport(report, isInitialized, path.basename(dir));
   for (const line of lines) console.log(line);
 }

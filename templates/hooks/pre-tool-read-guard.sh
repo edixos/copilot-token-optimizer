@@ -7,7 +7,7 @@
 # that are too large or obviously wasteful (lock files, minified JS, binaries).
 #
 # INSTALL: cpto hooks install pre-tool-read-guard
-# Or manually: copy to .copilot/hooks/pre-tool-read-guard.sh
+# Or manually: copy to .github/hooks/pre-tool-read-guard.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_READ_MAX_BYTES      — block threshold in bytes (default: 51200 = 50KB)

@@ -3,7 +3,7 @@
 # EVENT: UserPromptSubmit
 # DESCRIPTION: Detect .github/copilot-instructions.md sections never referenced in recent sessions and suggest pruning
 #
-# GitHub Copilot UserPromptSubmit hook: scans .copilot/sessions/token-log.md for session entries,
+# GitHub Copilot UserPromptSubmit hook: scans .github/sessions/token-log.md for session entries,
 # extracts section headers from .github/copilot-instructions.md, and flags sections with zero references across
 # the last 10+ sessions as "ghost tokens" worth pruning.
 #
@@ -19,8 +19,8 @@ if [ "${CPTO_GHOST_SCAN_DISABLE:-0}" = "1" ]; then
   exit 0
 fi
 
-SESSION_MARKER=".copilot/sessions/.ghost-checked-$(date +%Y%m%d)"
-TOKEN_LOG=".copilot/sessions/token-log.md"
+SESSION_MARKER=".github/sessions/.ghost-checked-$(date +%Y%m%d)"
+TOKEN_LOG=".github/sessions/token-log.md"
 COPILOT_MD=".github/copilot-instructions.md"
 
 # Run once per day
@@ -33,7 +33,7 @@ if [ ! -f "$TOKEN_LOG" ] || [ ! -f "$COPILOT_MD" ]; then
   exit 0
 fi
 
-mkdir -p ".copilot/sessions"
+mkdir -p ".github/sessions"
 touch "$SESSION_MARKER"
 
 python3 - "$TOKEN_LOG" "$COPILOT_MD" << 'PYEOF'
