@@ -1,6 +1,6 @@
 {
   "name": "@edixos/copilot-token-optimizer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Cut GitHub Copilot token usage by 90% — real token counts, optimized project setup",
   "bin": {
     "cpto": "bin/cpto.js"
