@@ -1,0 +1,51 @@
+name: Publish to npm
+
+on:
+  push:
+    # Only run for version tags such as v1.2.3.
+    tags:
+      - 'v*.*.*'
+
+# Minimal permissions required for checkout and npm provenance.
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish package
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the tagged source so npm publishes the exact release contents.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configure Node.js and npm registry authentication for the publish step.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org/'
+
+      # Install dependencies from the lockfile for a clean, reproducible release.
+      - name: Install dependencies
+        run: npm ci
+
+      # Detect whether the package defines a build script before trying to run it.
+      - name: Detect build script
+        id: build-script
+        run: |
+          echo "exists=$(node -p 'require("./package.json").scripts && require("./package.json").scripts.build ? "true" : "false"')" >> "$GITHUB_OUTPUT"
+
+      # Build only when the repository actually exposes npm run build.
+      - name: Build package
+        if: steps.build-script.outputs.exists == 'true'
+        run: npm run build
+
+      # Publish to npm with provenance, authenticated via the NPM_TOKEN secret.
+      - name: Publish to npm
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
