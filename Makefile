@@ -27,7 +27,9 @@ check-git:
 	fi
 
 publish-local: check-git install
+	@if [ -z "$(OTP)" ]; then \
+		echo "Error: OTP is required. Usage: make publish-local OTP=123456"; \
+		exit 1; \
+	fi
 	@echo "Publishing to npm..."
-	@# Notice: We don't use --provenance here because npm provenance 
-	@# requires being run in a supported CI/CD environment (like GitHub Actions).
-	npm publish --access public
+	npm publish --access public --otp=$(OTP)

@@ -1,5 +1,5 @@
 {
-  "name": "copilot-token-optimizer",
+  "name": "@edixos/copilot-token-optimizer",
   "version": "0.1.0",
   "description": "Cut GitHub Copilot token usage by 90% — real token counts, optimized project setup",
   "bin": {
@@ -43,7 +43,7 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
-    "gpt-tokenizer": "^3.4.0",
-    "glob": "^11.0.0"
+    "glob": "^11.0.0",
+    "gpt-tokenizer": "^3.4.0"
   }
 }
