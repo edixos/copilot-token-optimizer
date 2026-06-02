@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { countTokens } from '../lib/tokenizer.js';
+import { scanDeepDocFiles } from '../lib/scanner.js';
 
 const LANG_SHORT = {
   javascript: 'js', typescript: 'ts', python: 'py', ruby: 'rb',
@@ -74,6 +75,55 @@ export function applyCompressionRules(content, aggressive = false) {
   return { result, changes };
 }
 
+// ─── deep docs index helpers ─────────────────────────────────────────────────
+
+export const DEEP_DOCS_SECTION_START = '<!-- cpto:deep-docs-index -->';
+export const DEEP_DOCS_SECTION_END = '<!-- /cpto:deep-docs-index -->';
+
+/**
+ * Builds a markdown section listing deep docs files as on-demand references.
+ * Copilot should read these using tool calls only when the task requires them.
+ */
+export function buildDeepDocsIndexSection(deepFiles) {
+  if (deepFiles.length === 0) return '';
+  const lines = [
+    DEEP_DOCS_SECTION_START,
+    '',
+    '## Deep Reference Docs (Load On-Demand)',
+    '',
+    '> ⚡ These files are **not** auto-loaded. Use `read_file` / tool calls to load only when the task needs them.',
+    '',
+  ];
+  for (const f of deepFiles) {
+    const desc = f.heading ? ` — ${f.heading}` : '';
+    lines.push(`- \`${f.rel}\`${desc}`);
+  }
+  lines.push('', DEEP_DOCS_SECTION_END);
+  return lines.join('\n');
+}
+
+/**
+ * Injects or replaces the deep-docs index section in copilot-instructions.md.
+ * Returns the updated content and whether a change was made.
+ */
+export function injectDeepDocsIndex(content, section) {
+  const hasSection = content.includes(DEEP_DOCS_SECTION_START);
+  if (hasSection) {
+    const updated = content.replace(
+      new RegExp(`${DEEP_DOCS_SECTION_START}[\\s\\S]*?${DEEP_DOCS_SECTION_END}`, 'g'),
+      section,
+    );
+    return { content: updated, injected: updated !== content };
+  }
+  // Append before final cpto footer if present, otherwise at end
+  const footerIdx = content.lastIndexOf('\n---\n\n**Last Updated**:');
+  if (footerIdx !== -1) {
+    const updated = content.slice(0, footerIdx) + '\n\n' + section + content.slice(footerIdx);
+    return { content: updated, injected: true };
+  }
+  return { content: content.trimEnd() + '\n\n' + section + '\n', injected: true };
+}
+
 // ─── output helpers ──────────────────────────────────────────────────────────
 
 export function printCompressionReport(stats, changes) {
@@ -132,21 +182,45 @@ function writeCompressed(copilotMdPath, original, compressed, backup, stats) {
 // ─── command entry point ─────────────────────────────────────────────────────
 
 export async function compressCommand(options) {
-  const copilotMdPath = path.join(process.cwd(), '.github/copilot-instructions.md');
+  const dir = process.cwd();
+  const copilotMdPath = path.join(dir, '.github/copilot-instructions.md');
   if (!fs.existsSync(copilotMdPath)) {
     console.error(chalk.red('✗ .github/copilot-instructions.md not found. Run: cpto init'));
     process.exit(1);
   }
   const original = fs.readFileSync(copilotMdPath, 'utf8');
-  const { result: compressed, changes } = applyCompressionRules(original, options?.aggressive);
-  const stats = computeTokenStats(original, compressed);
-  printCompressionReport(stats, changes);
-  if (!shouldWrite(original, compressed, changes, options?.dryRun)) return;
+  const { result: textCompressed, changes } = applyCompressionRules(original, options?.aggressive);
+
+  // Discover deep docs that should be routed through on-demand tool calls
+  const deepFiles = await scanDeepDocFiles(dir);
+  let finalContent = textCompressed;
+  const deepDocsChanges = [];
+  if (deepFiles.length > 0) {
+    const section = buildDeepDocsIndexSection(deepFiles);
+    const { content: withIndex, injected } = injectDeepDocsIndex(finalContent, section);
+    if (injected) {
+      finalContent = withIndex;
+      deepDocsChanges.push(
+        `Injected deep-docs index (${deepFiles.length} file${deepFiles.length !== 1 ? 's' : ''} listed as on-demand references)`
+      );
+    }
+  }
+
+  const allChanges = [...changes, ...deepDocsChanges];
+  const stats = computeTokenStats(original, finalContent);
+  printCompressionReport(stats, allChanges);
+
+  if (deepFiles.length > 0) {
+    console.log(chalk.dim(`  📂 ${deepFiles.length} deep doc file${deepFiles.length !== 1 ? 's' : ''} routed to on-demand index (not auto-loaded)`));
+    console.log('');
+  }
+
+  if (!shouldWrite(original, finalContent, allChanges, options?.dryRun)) return;
   const confirmed = await promptApply();
   if (!confirmed) {
     console.log(chalk.dim('Skipped.'));
     console.log('');
     return;
   }
-  writeCompressed(copilotMdPath, original, compressed, options?.backup, stats);
+  writeCompressed(copilotMdPath, original, finalContent, options?.backup, stats);
 }

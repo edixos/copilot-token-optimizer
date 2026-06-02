@@ -81,6 +81,38 @@ Reusable templates for documentation maintenance and task tracking.
 .github/completions/2025-11-12-optimize-queries.md
 ```
 
+### Skills
+
+Skills are plugin-like automation templates that extend GitHub Copilot's capabilities.
+
+**Install via CLI:**
+```bash
+# Interactive (prompts for scope: local project or global)
+cpto skills install init-cpto
+
+# Install all available skills
+cpto skills install --all
+
+# Non-interactive: install to .github/skills/ directly
+cpto skills install --all --scope local
+
+# Non-interactive: install globally to ~/.agents/skills/
+cpto skills install --all --scope global
+```
+
+**Trigger in Copilot Chat:**
+```
+@init-cpto
+```
+
+> The `@init-cpto` skill reads your project, selects the right doc templates, and fills every placeholder with real project-specific content.
+
+**Skill install scopes:**
+| Scope | Path | Availability |
+|---|---|---|
+| Local | `.github/skills/` | This project only |
+| Global | `~/.agents/skills/` | All projects on this machine |
+
 ### Maintenance Guide
 
 1. **At project setup**: Copy to `.github/DOCUMENTATION_MAINTENANCE.md`

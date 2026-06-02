@@ -21,6 +21,7 @@ import {
   TEMPLATES_DIR,
 } from '../lib/paths.js';
 import { hooksCommand } from './hooks.js';
+import { skillsInstall, getAvailableSkills } from './skills.js';
 
 function prompt(rl, question) {
   return new Promise(resolve => rl.question(question, resolve));
@@ -334,6 +335,9 @@ export function printNextSteps() {
   console.log(`   3. Fill in ${chalk.cyan(ARCHITECTURE_MAP_PATH)}`);
   console.log(`   4. Add to CI: ${chalk.cyan(`npx ${PACKAGE_NAME} audit --json`)}`);
   console.log('');
+  console.log('   🧩 Start a Copilot Chat session and type:');
+  console.log(`      ${chalk.bold.cyan('@init-cpto')}  to let the skill intelligently fill in your docs`);
+  console.log('');
   console.log(`   Run ${chalk.cyan('cpto measure')} to verify savings`);
   console.log('');
 }
@@ -359,6 +363,35 @@ export async function maybeInstallHooks(installHooks, yes) {
       console.log('');
     } else {
       console.log(chalk.dim('Skipped. Run: cpto hooks install --all  to add later.'));
+      console.log('');
+    }
+  }
+}
+
+export async function maybeInstallSkills(installSkills, yes) {
+  const available = getAvailableSkills();
+  if (available.length === 0) return; // nothing to offer
+
+  if (installSkills) {
+    // Non-interactive: install all skills to local scope
+    await skillsInstall(null, { all: true, scope: 'local' });
+    return;
+  }
+
+  if (!yes) {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const ans = await new Promise(resolve => rl.question(
+      chalk.blue('🧩 Install native GitHub Copilot skills for specialized automation? (y/N) '),
+      resolve
+    ));
+    rl.close();
+    console.log('');
+
+    if (ans.trim().toLowerCase() === 'y') {
+      // Let skillsInstall prompt for scope interactively
+      await skillsInstall(null, { all: true });
+    } else {
+      console.log(chalk.dim('Skipped. Run: cpto skills install --all  to add later.'));
       console.log('');
     }
   }
@@ -399,7 +432,7 @@ export async function runInit(dir, options) {
 export async function initCommand(options) {
   printHeader();
 
-  let { framework, yes, force, hooks: installHooks } = options;
+  let { framework, yes, force, hooks: installHooks, skills: installSkills } = options;
   const resolved = resolveFramework(framework, process.cwd());
   framework = resolved.framework;
   printFrameworkInfo(resolved);
@@ -434,5 +467,6 @@ export async function initCommand(options) {
     printSetupComplete();
   }
   await maybeInstallHooks(installHooks, yes);
+  await maybeInstallSkills(installSkills, yes);
   printNextSteps();
 }

@@ -29,12 +29,31 @@ export const HOOKS_SCRIPTS_DIR = '.github/scripts/copilot-hooks';
 export const DOCS_INDEX_PATH = 'docs/INDEX.md';
 export const WRITE_LOG_PATH = `${SESSIONS_DIR}/write-log.md`;
 
+// Skills directories
+export const SKILLS_LOCAL_DIR = '.github/skills';
+export const SKILLS_GLOBAL_DIR = '~/.agents/skills'; // resolved at runtime with os.homedir()
+
+// Patterns for scanning files that are auto-loaded by Copilot at session start.
+// Limited to shallow docs paths (top-level + one-level subdirs) to avoid token bloat
+// from large reference libraries under deep subdirectories like docs/resources/**.
 export const AUTO_LOAD_PATTERNS = [
   '*.md',
   COPILOT_MD_PATH,
   ...CORE_REFERENCE_FILES,
   `${INSTRUCTIONS_DIR}/**/*.instructions.md`,
-  'docs/**/*.md',
+  'docs/*.md',         // top-level docs only
+  'docs/*/*.md',       // one subdirectory deep (e.g. docs/learnings/topic.md)
+];
+
+// Glob pattern used by compress to discover deep docs that should be referenced
+// via on-demand tool calls rather than auto-loaded at session start.
+export const DOCS_DEEP_PATTERNS = ['docs/*/*/**/*.md', 'docs/*/**/*.md'];
+// Patterns always excluded by default (applied on top of .copilotignore)
+export const DOCS_DEFAULT_EXCLUDE_PATTERNS = [
+  'docs/archive/**',
+  `.cpto/completions/**`,
+  `.cpto/sessions/**`,
+  `.cpto/templates/**`,
 ];
 
 export const WATCHED_FILES = [

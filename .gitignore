@@ -25,3 +25,7 @@ docs/INDEX.md
 .woterclip/
 .antigravitycli/
 *.tgz
+.copilot-runtime/
+.cpto/sessions/
+.cpto/completions/
+.cpto/templates/

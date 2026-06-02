@@ -9,6 +9,7 @@ import { pruneCommand } from './commands/prune.js';
 import { watchCommand } from './commands/watch.js';
 import { diffCommand } from './commands/diff.js';
 import { updateCommand } from './commands/update.js';
+import { skillsCommand } from './commands/skills.js';
 
 const { version } = createRequire(import.meta.url)('../package.json');
 
@@ -27,6 +28,7 @@ export function run() {
     .option('--yes', 'non-interactive with defaults')
     .option('--force', 'overwrite existing .github/copilot-instructions.md if present')
     .option('--hooks', 'install Copilot helper scripts non-interactively')
+    .option('--skills', 'install Copilot skills to .github/skills/ non-interactively')
     .action(initCommand);
 
   program
@@ -107,6 +109,22 @@ export function run() {
     .description('Update cpto to the latest version, or refresh project content templates')
     .option('--content', 'refresh project files (.github/copilot-instructions.md sections, hook scripts) without touching custom content')
     .action(updateCommand);
+
+  const skills = program
+    .command('skills')
+    .description('Manage Copilot skills (plugin-like automation templates)');
+
+  skills
+    .command('list')
+    .description('Show available skills and their installation status')
+    .action(() => skillsCommand('list'));
+
+  skills
+    .command('install [name]')
+    .description('Install a skill (local: .github/skills/ or global: ~/.agents/skills/)')
+    .option('-a, --all', 'install all available skills')
+    .option('--scope <scope>', 'install scope: "local" or "global" (skips interactive prompt)')
+    .action((name, opts) => skillsCommand('install', name, opts));
 
   program.parse();
 }

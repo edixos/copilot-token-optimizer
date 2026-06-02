@@ -1,0 +1,43 @@
+# .copilotignore — never load these into default context
+
+# Completed task notes
+.cpto/completions/**
+
+# Session journals
+.cpto/sessions/**
+
+# Archived documentation
+docs/archive/**
+
+# Dependency directories
+node_modules/**
+vendor/**
+
+# Build artifacts
+dist/**
+build/**
+out/**
+.next/**
+target/**
+bin/**
+
+# Log files
+*.log
+logs/**
+
+# Test coverage output
+coverage/**
+*.out
+
+# Editor / OS metadata
+.DS_Store
+.idea/**
+.vscode/**
+*.swp
+*.swo
+
+# Generated — never edit by hand, consult the regeneration command instead
+# [Add project-specific generated paths here, e.g.:]
+# internal/gen/**
+# src/gen/**
+# proto/api/**

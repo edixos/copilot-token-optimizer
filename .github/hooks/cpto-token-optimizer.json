@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "hooks": {
+    "notification": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/notification-token-display.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/post-write-token-diff.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/pre-tool-bash-guard.sh",
+        "cwd": ".",
+        "timeoutSec": 30,
+        "matcher": "bash"
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/pre-tool-read-guard.sh",
+        "cwd": ".",
+        "timeoutSec": 30,
+        "matcher": "read_file"
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/pre-tool-token-guard.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "sessionEnd": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/session-end-token-report.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "agentStop": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/stop-path-guard.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/stop-session-snapshot.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/user-prompt-ghost-scanner.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/user-prompt-inject-context.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/user-prompt-inject-snapshot.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      },
+      {
+        "type": "command",
+        "bash": "./.github/scripts/copilot-hooks/user-prompt-validate-copilot-instructions.sh",
+        "cwd": ".",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}
