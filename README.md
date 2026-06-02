@@ -8,8 +8,8 @@ Cut your Copilot working-context footprint by up to 90% by keeping the always-on
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/edixos/copilot-token-optimizer?style=social)](https://github.com/edixos/copilot-token-optimizer/stargazers)
-[![npm version](https://img.shields.io/npm/v/copilot-token-optimizer.svg)](https://www.npmjs.com/package/copilot-token-optimizer)
-[![npm downloads](https://img.shields.io/npm/dm/copilot-token-optimizer.svg)](https://www.npmjs.com/package/copilot-token-optimizer)
+[![npm version](https://img.shields.io/npm/v/copilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
+[![npm downloads](https://img.shields.io/npm/dm/copilot-token-optimizer.svg)](https://www.npmjs.com/package/@edixos/copilot-token-optimizer)
 
 </div>
 
