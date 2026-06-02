@@ -1,0 +1,26 @@
+# Added by code-review-graph
+.code-review-graph/
+
+# Dependencies
+node_modules/
+
+# IDE and workspace tool configs (local only)
+.copilot/
+.copilotignore
+.cursorrules
+.kiro/
+.mcp.json
+.omc/
+.opencode.json
+.windsurfrules
+AGENTS.md
+GEMINI.md
+
+# Self-generated demo artifacts (from running cpto init in this repo)
+.github/copilot-instructions.md
+docs/INDEX.md
+
+# Local agent/tool state and build artifacts (not for repo)
+.woterclip/
+.antigravitycli/
+*.tgz
