@@ -174,7 +174,7 @@ Use this file as the startup summary for Copilot Chat. For non-trivial work, con
 ---
 
 **Last Updated**: $(date +%Y-%m-%d)
-**Optimized with**: [Copilot Token Optimizer](https://github.com/nadimtuhin/copilot-token-optimizer)
+**Optimized with**: [Copilot Token Optimizer](https://github.com/edixos/copilot-token-optimizer)
 EOF
 
 echo "   ✓ Created .github/copilot-instructions.md"
@@ -472,7 +472,7 @@ echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo -e "${BLUE}📚 Documentation:${NC}"
-echo "   https://github.com/nadimtuhin/copilot-token-optimizer"
+echo "   https://github.com/edixos/copilot-token-optimizer"
 echo ""
 echo -e "${GREEN}🎉 Ready to save 90% on tokens!${NC}"
 echo ""

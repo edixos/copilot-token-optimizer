@@ -64,7 +64,7 @@ Use this file as the startup summary for Copilot Chat. For non-trivial work, con
 ---
 
 **Last Updated**: ${date}
-**Optimized with**: [Copilot Token Optimizer](https://github.com/nadimtuhin/copilot-token-optimizer)
+**Optimized with**: [Copilot Token Optimizer](https://github.com/edixos/copilot-token-optimizer)
 `;
 }
 
@@ -182,7 +182,7 @@ export function appendCtoSections(existingContent, date) {
   const missing = getMissingCtoSections(existingContent);
   if (missing.length === 0) return { content: existingContent, added: [] };
 
-  const ctoFooter = `\n\n---\n\n**Last Updated**: ${date}\n**Optimized with**: [Copilot Token Optimizer](https://github.com/nadimtuhin/copilot-token-optimizer)\n`;
+  const ctoFooter = `\n\n---\n\n**Last Updated**: ${date}\n**Optimized with**: [Copilot Token Optimizer](https://github.com/edixos/copilot-token-optimizer)\n`;
 
   // Strip existing cpto footer to avoid duplication before re-appending
   const stripped = existingContent.replace(

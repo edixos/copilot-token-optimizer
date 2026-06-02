@@ -129,7 +129,7 @@ export async function updateCommand(opts) {
     console.log('');
     console.log('Run one of:');
     console.log(`  ${chalk.cyan(`npm install -g copilot-token-optimizer@${latest}`)}`);
-    console.log(`  ${chalk.cyan(`curl -fsSL https://raw.githubusercontent.com/nadimtuhin/copilot-token-optimizer/main/install.sh | bash`)}`);
+    console.log(`  ${chalk.cyan(`curl -fsSL https://raw.githubusercontent.com/edixos/copilot-token-optimizer/main/install.sh | bash`)}`);
   }
   console.log('');
 }

@@ -11,7 +11,7 @@ This project adapts the documentation-optimization workflow for GitHub Copilot. 
 
 ## Reporting Issues
 
-Before opening a new issue, check [existing issues](https://github.com/nadimtuhin/copilot-token-optimizer/issues).
+Before opening a new issue, check [existing issues](https://github.com/edixos/copilot-token-optimizer/issues).
 
 When filing a bug, include:
 

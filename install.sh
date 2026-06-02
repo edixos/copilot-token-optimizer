@@ -1,6 +1,6 @@
 #!/bin/bash
 # Copilot Token Optimizer — one-line global installer
-# Usage: curl -fsSL https://raw.githubusercontent.com/nadimtuhin/copilot-token-optimizer/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/edixos/copilot-token-optimizer/main/install.sh | bash
 
 set -e
 

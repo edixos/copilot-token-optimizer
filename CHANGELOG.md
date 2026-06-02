@@ -574,5 +574,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
 
 ---
 
-**Repository**: https://github.com/nadimtuhin/copilot-token-optimizer
+**Repository**: https://github.com/edixos/copilot-token-optimizer
 **License**: MIT

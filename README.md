@@ -7,7 +7,7 @@
 Cut your Copilot working-context footprint by up to 90% by keeping the always-on instructions lean and routing deep documentation only when it is relevant.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub stars](https://img.shields.io/github/stars/nadimtuhin/copilot-token-optimizer?style=social)](https://github.com/nadimtuhin/copilot-token-optimizer/stargazers)
+[![GitHub stars](https://img.shields.io/github/stars/edixos/copilot-token-optimizer?style=social)](https://github.com/edixos/copilot-token-optimizer/stargazers)
 [![npm version](https://img.shields.io/npm/v/copilot-token-optimizer.svg)](https://www.npmjs.com/package/copilot-token-optimizer)
 [![npm downloads](https://img.shields.io/npm/dm/copilot-token-optimizer.svg)](https://www.npmjs.com/package/copilot-token-optimizer)
 
@@ -45,7 +45,7 @@ npx copilot-token-optimizer init
 **Option B — one-line install with global `cpto`:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nadimtuhin/copilot-token-optimizer/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/edixos/copilot-token-optimizer/main/install.sh | bash
 cpto init
 ```
 
@@ -240,8 +240,8 @@ Framework additions, docs improvements, CLI fixes, and helper-script improvement
 
 ## Need Help?
 
-- Bug: [open an issue](https://github.com/nadimtuhin/copilot-token-optimizer/issues)
-- Discussion: [start a discussion](https://github.com/nadimtuhin/copilot-token-optimizer/discussions)
+- Bug: [open an issue](https://github.com/edixos/copilot-token-optimizer/issues)
+- Discussion: [start a discussion](https://github.com/edixos/copilot-token-optimizer/discussions)
 
 ## License
 
