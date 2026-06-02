@@ -1,13 +1,18 @@
 #!/bin/bash
 # pre-tool-read-guard.sh
-# EVENT: PreToolUse
+# EVENT: preToolUse
+# MATCHER: read_file
 # DESCRIPTION: Block reads of lock files, minified JS, binaries, and oversized files
 #
-# GitHub Copilot PreToolUse hook: blocks or warns when Copilot tries to Read files
-# that are too large or obviously wasteful (lock files, minified JS, binaries).
+# Native GitHub Copilot preToolUse hook: blocks or warns when Copilot tries to read
+# files that are too large or obviously wasteful (lock files, minified JS, binaries).
+#
+# Input: JSON on stdin with { toolName, toolArgs: { file_path: "..." }, ... }
+# Output: JSON to stdout for deny decisions
+#   - Exit 0: allow
+#   - Exit 2: deny the tool call
 #
 # INSTALL: cpto hooks install pre-tool-read-guard
-# Or manually: copy to .github/hooks/pre-tool-read-guard.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_READ_MAX_BYTES      — block threshold in bytes (default: 51200 = 50KB)
@@ -16,12 +21,7 @@
 
 # Bypass switch
 if [ "${CPTO_READ_GUARD_DISABLE:-0}" = "1" ]; then
-  exit 0
-fi
-
-# Only fire on Read tool
-TOOL_NAME="${COPILOT_TOOL_NAME:-}"
-if [ "$TOOL_NAME" != "Read" ]; then
+  cat > /dev/null
   exit 0
 fi
 
@@ -33,7 +33,11 @@ FILE_PATH=$(cat | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    print(data.get('tool_input', {}).get('file_path', ''))
+    args = data.get('toolArgs', data.get('tool_input', {}))
+    if isinstance(args, str):
+        import json as j
+        args = j.loads(args)
+    print(args.get('file_path', args.get('filePath', '')))
 except:
     pass
 " 2>/dev/null)
@@ -48,32 +52,26 @@ EXT="${BASENAME##*.}"
 
 case "$BASENAME" in
   package-lock.json|yarn.lock|pnpm-lock.yaml|Cargo.lock|poetry.lock|Gemfile.lock|composer.lock)
-    echo "🚫 Read blocked: '$FILE_PATH' is a lock file (~10,000–50,000 tokens)." >&2
-    echo "   Lock files are auto-generated and wasteful to read directly." >&2
-    echo "   Use: cat package.json | python3 -m json.tool  for dependency info" >&2
-    echo "   Override: CPTO_READ_GUARD_DISABLE=1" >&2
+    echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is a lock file (~10,000-50,000 tokens). Use: cat package.json for dependency info\"}"
     exit 2
     ;;
 esac
 
 case "$EXT" in
   min.js|min.css)
-    echo "🚫 Read blocked: '$FILE_PATH' is a minified file (~high token count)." >&2
-    echo "   Read the source file instead." >&2
+    echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is a minified file. Read the source file instead.\"}"
     exit 2
     ;;
   snap)
-    echo "🚫 Read blocked: '$FILE_PATH' is a test snapshot file." >&2
-    echo "   Snapshots are generated output — read the test source instead." >&2
+    echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is a test snapshot. Read the test source instead.\"}"
     exit 2
     ;;
   pb.go|pb)
-    echo "🚫 Read blocked: '$FILE_PATH' appears to be a protobuf-generated file." >&2
-    echo "   Read the .proto source file instead." >&2
+    echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is a protobuf-generated file. Read the .proto source instead.\"}"
     exit 2
     ;;
   pyc|pyo|class|o|a|so|dylib|dll|exe|wasm)
-    echo "🚫 Read blocked: '$FILE_PATH' is a compiled binary file." >&2
+    echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is a compiled binary file.\"}"
     exit 2
     ;;
 esac
@@ -88,9 +86,7 @@ FILE_BYTES=$(wc -c < "$FILE_PATH" 2>/dev/null || echo "0")
 if [ "$FILE_BYTES" -ge "$READ_MAX_BYTES" ] 2>/dev/null; then
   FILE_KB=$((FILE_BYTES / 1024))
   APPROX_TOKENS=$((FILE_BYTES / 4))
-  echo "🚫 Read blocked: '$FILE_PATH' is ${FILE_KB}KB (~${APPROX_TOKENS} tokens, limit: $((READ_MAX_BYTES / 1024))KB)." >&2
-  echo "   Use Read with offset/limit params, or: head -100 '$FILE_PATH'" >&2
-  echo "   Override: CPTO_READ_GUARD_DISABLE=1  or raise CPTO_READ_MAX_BYTES" >&2
+  echo "{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"'$FILE_PATH' is ${FILE_KB}KB (~${APPROX_TOKENS} tokens, limit: $((READ_MAX_BYTES / 1024))KB). Use head -100 or read with offset/limit.\"}"
   exit 2
 elif [ "$FILE_BYTES" -ge "$READ_WARN_BYTES" ] 2>/dev/null; then
   FILE_KB=$((FILE_BYTES / 1024))

@@ -9,6 +9,8 @@ import { execSync, spawnSync } from 'node:child_process';
 import {
   parseHookMeta,
   buildSettingsBlock,
+  mapEventToNative,
+  writeNativeConfig,
   formatHookLine,
   readTemplates,
   installHook,
@@ -33,6 +35,12 @@ describe('unit — pure logic', () => {
       assert.equal(meta.desc, 'Guard token usage');
     });
 
+    it('extracts camelCase native event names', () => {
+      const content = '#!/bin/bash\n# EVENT: preToolUse\n# DESCRIPTION: Native hook\n';
+      const meta = parseHookMeta(content);
+      assert.equal(meta.event, 'preToolUse');
+    });
+
     it('returns Unknown event when missing', () => {
       const meta = parseHookMeta('#!/bin/bash\n# DESCRIPTION: something\n');
       assert.equal(meta.event, 'Unknown');
@@ -44,31 +52,58 @@ describe('unit — pure logic', () => {
     });
   });
 
+  describe('mapEventToNative', () => {
+    it('maps PascalCase to camelCase native events', () => {
+      assert.equal(mapEventToNative('PreToolUse'), 'preToolUse');
+      assert.equal(mapEventToNative('PostToolUse'), 'postToolUse');
+      assert.equal(mapEventToNative('Stop'), 'agentStop');
+      assert.equal(mapEventToNative('UserPromptSubmit'), 'userPromptSubmitted');
+      assert.equal(mapEventToNative('Notification'), 'notification');
+      assert.equal(mapEventToNative('SessionEnd'), 'sessionEnd');
+    });
+
+    it('passes through already-native event names', () => {
+      assert.equal(mapEventToNative('preToolUse'), 'preToolUse');
+      assert.equal(mapEventToNative('agentStop'), 'agentStop');
+      assert.equal(mapEventToNative('userPromptSubmitted'), 'userPromptSubmitted');
+    });
+  });
+
   describe('buildSettingsBlock', () => {
-    it('groups hooks by event', () => {
+    it('groups hooks by native event name', () => {
       const hooks = [
         { event: 'PreToolUse', file: 'a.sh', name: 'a' },
         { event: 'PreToolUse', file: 'b.sh', name: 'b' },
         { event: 'PostToolUse', file: 'c.sh', name: 'c' },
       ];
       const block = buildSettingsBlock(hooks);
-      assert.ok(block.hooks.PreToolUse, 'should have PreToolUse');
-      assert.ok(block.hooks.PostToolUse, 'should have PostToolUse');
-      assert.equal(block.hooks.PreToolUse.length, 2);
-      assert.equal(block.hooks.PostToolUse.length, 1);
+      assert.ok(block.hooks.preToolUse, 'should have preToolUse');
+      assert.ok(block.hooks.postToolUse, 'should have postToolUse');
+      assert.equal(block.hooks.preToolUse.length, 2);
+      assert.equal(block.hooks.postToolUse.length, 1);
     });
 
-    it('each entry has correct command', () => {
+    it('each entry has correct native hook format', () => {
       const hooks = [{ event: 'Stop', file: 'stop.sh', name: 'stop' }];
       const block = buildSettingsBlock(hooks);
-      const cmd = block.hooks.Stop[0].hooks[0].command;
-      assert.equal(cmd, 'bash .github/scripts/copilot-hooks/stop.sh');
+      const entry = block.hooks.agentStop[0];
+      assert.equal(entry.type, 'command');
+      assert.equal(entry.bash, './.github/scripts/copilot-hooks/stop.sh');
+      assert.equal(entry.cwd, '.');
+      assert.equal(entry.timeoutSec, 30);
     });
 
-    it('returns valid JSON-serialisable structure', () => {
+    it('includes version 1 in output', () => {
       const hooks = [{ event: 'UserPromptSubmit', file: 'p.sh', name: 'p' }];
       const block = buildSettingsBlock(hooks);
+      assert.equal(block.version, 1);
       assert.doesNotThrow(() => JSON.stringify(block));
+    });
+
+    it('includes matcher for preToolUse hooks', () => {
+      const hooks = [{ event: 'PreToolUse', file: 'guard.sh', name: 'guard', matcher: 'bash' }];
+      const block = buildSettingsBlock(hooks);
+      assert.equal(block.hooks.preToolUse[0].matcher, 'bash');
     });
   });
 
@@ -91,10 +126,10 @@ describe('unit — pure logic', () => {
       assert.ok(line.includes('[installed]'));
     });
 
-    it('contains event name', () => {
+    it('contains native event name', () => {
       const hook = { name: 'x', file: 'x.sh', event: 'PostToolUse', desc: 'my desc', installed: false };
       const line = formatHookLine(hook);
-      assert.ok(line.includes('PostToolUse'));
+      assert.ok(line.includes('postToolUse'));
     });
   });
 });
@@ -103,9 +138,13 @@ describe('unit — pure logic', () => {
 
 describe('integration — filesystem', () => {
   let tmpDir;
+  let scriptsDir;
 
   before(() => {
+    // Create a realistic project structure: tmpDir/.github/scripts/copilot-hooks/
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-hooks-'));
+    scriptsDir = path.join(tmpDir, '.github', 'scripts', 'copilot-hooks');
+    fs.mkdirSync(scriptsDir, { recursive: true });
   });
 
   after(() => {
@@ -113,56 +152,62 @@ describe('integration — filesystem', () => {
   });
 
   it('readTemplates returns array of hook descriptors', () => {
-    const templates = readTemplates(TEMPLATES_DIR, tmpDir);
+    const templates = readTemplates(TEMPLATES_DIR, scriptsDir);
     assert.ok(templates.length > 0, 'should find templates');
     for (const t of templates) {
       assert.ok(t.name, 'has name');
       assert.ok(t.file.endsWith('.sh'), 'file ends with .sh');
       assert.ok(t.event, 'has event');
-      assert.equal(t.installed, false, 'none installed in fresh tmpDir');
+      assert.equal(t.installed, false, 'none installed in fresh scriptsDir');
     }
   });
 
   it('readTemplates returns [] for nonexistent dir', () => {
-    const result = readTemplates('/nonexistent/path', tmpDir);
+    const result = readTemplates('/nonexistent/path', scriptsDir);
     assert.deepEqual(result, []);
   });
 
   it('installHook copies file and makes it executable', () => {
-    installHook('pre-tool-token-guard', TEMPLATES_DIR, tmpDir, {});
-    const dst = path.join(tmpDir, 'pre-tool-token-guard.sh');
+    installHook('pre-tool-token-guard', TEMPLATES_DIR, scriptsDir, {});
+    const dst = path.join(scriptsDir, 'pre-tool-token-guard.sh');
     assert.ok(fs.existsSync(dst), 'file should exist');
     const mode = fs.statSync(dst).mode;
     assert.ok(mode & 0o111, 'should be executable');
   });
 
   it('installHook is idempotent', () => {
-    installHook('pre-tool-token-guard', TEMPLATES_DIR, tmpDir, {});
-    installHook('pre-tool-token-guard', TEMPLATES_DIR, tmpDir, {});
-    const dst = path.join(tmpDir, 'pre-tool-token-guard.sh');
+    installHook('pre-tool-token-guard', TEMPLATES_DIR, scriptsDir, {});
+    installHook('pre-tool-token-guard', TEMPLATES_DIR, scriptsDir, {});
+    const dst = path.join(scriptsDir, 'pre-tool-token-guard.sh');
     assert.ok(fs.existsSync(dst), 'still exists after second install');
   });
 
   it('readTemplates shows installed=true after installHook', () => {
-    const templates = readTemplates(TEMPLATES_DIR, tmpDir);
+    const templates = readTemplates(TEMPLATES_DIR, scriptsDir);
     const t = templates.find(x => x.name === 'pre-tool-token-guard');
     assert.ok(t, 'template found');
     assert.equal(t.installed, true);
   });
 
   it('removeHook with yes:true removes the file', async () => {
-    const dst = path.join(tmpDir, 'pre-tool-token-guard.sh');
+    const dst = path.join(scriptsDir, 'pre-tool-token-guard.sh');
     assert.ok(fs.existsSync(dst), 'exists before remove');
-    await removeHook('pre-tool-token-guard', tmpDir, { yes: true });
+    await removeHook('pre-tool-token-guard', scriptsDir, { yes: true });
     assert.ok(!fs.existsSync(dst), 'gone after remove');
   });
 
-  it('installHook --all installs every template', () => {
-    installHook(null, TEMPLATES_DIR, tmpDir, { all: true });
+  it('installHook --all installs every template and writes config', () => {
+    installHook(null, TEMPLATES_DIR, scriptsDir, { all: true });
     const templateFiles = fs.readdirSync(TEMPLATES_DIR).filter(f => f.endsWith('.sh'));
     for (const f of templateFiles) {
-      assert.ok(fs.existsSync(path.join(tmpDir, f)), `${f} should be installed`);
+      assert.ok(fs.existsSync(path.join(scriptsDir, f)), `${f} should be installed`);
     }
+    // Verify native config was written
+    const configPath = path.join(tmpDir, '.github', 'hooks', 'cpto-token-optimizer.json');
+    assert.ok(fs.existsSync(configPath), 'native config JSON should be created');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.equal(config.version, 1);
+    assert.ok(config.hooks.preToolUse, 'config should have preToolUse hooks');
   });
 
   it('settingsHooks outputs valid JSON grouped by event', () => {
@@ -171,7 +216,7 @@ describe('integration — filesystem', () => {
     const origLog = console.log;
     console.log = (...args) => { captured += args.join(' ') + '\n'; };
     try {
-      settingsHooks(TEMPLATES_DIR, tmpDir);
+      settingsHooks(TEMPLATES_DIR, scriptsDir);
     } finally {
       console.log = origLog;
     }
@@ -182,7 +227,8 @@ describe('integration — filesystem', () => {
     let parsed;
     assert.doesNotThrow(() => { parsed = JSON.parse(jsonStr); }, 'output should be valid JSON');
     assert.ok(parsed.hooks, 'has hooks key');
-    assert.ok(Object.keys(parsed.hooks).includes('PreToolUse'), 'has PreToolUse');
+    assert.equal(parsed.version, 1, 'has version 1');
+    assert.ok(Object.keys(parsed.hooks).includes('preToolUse'), 'has preToolUse');
   });
 
   it('statusHooks lists installed hooks', () => {
@@ -190,7 +236,7 @@ describe('integration — filesystem', () => {
     const origLog = console.log;
     console.log = (...args) => { captured += args.join(' ') + '\n'; };
     try {
-      statusHooks(TEMPLATES_DIR, tmpDir);
+      statusHooks(TEMPLATES_DIR, scriptsDir);
     } finally {
       console.log = origLog;
     }
@@ -216,7 +262,7 @@ describe('e2e — subprocess', () => {
     assert.equal(result.status, 0);
     const out = result.stdout;
     assert.ok(out.includes('pre-tool-token-guard'), 'should list pre-tool-token-guard');
-    assert.ok(out.includes('PreToolUse') || out.includes('PostToolUse'), 'should show event types');
+    assert.ok(out.includes('preToolUse') || out.includes('postToolUse'), 'should show event types');
   });
 
   it('hooks install nonexistent exits non-zero', () => {

@@ -1,40 +1,46 @@
 #!/bin/bash
 # post-write-token-diff.sh
-# EVENT: PostToolUse
-# DESCRIPTION: Log token cost of each Write/Edit to .github/sessions/write-log.md
+# EVENT: postToolUse
+# MATCHER: (write_file|replace_string_in_file|create_file|edit_file)
+# DESCRIPTION: Log token cost of each Write/Edit to .cpto/sessions/write-log.md
 #
-# GitHub Copilot PostToolUse hook: logs token cost of each Write/Edit operation.
-# Appends to .github/sessions/write-log.md so you can see which files are
+# Native GitHub Copilot postToolUse hook: logs token cost of each write operation.
+# Appends to .cpto/sessions/write-log.md so you can see which files are
 # growing your context window.
 #
+# Input: JSON on stdin with { toolName, toolArgs: { filePath: "..." }, result, ... }
+# Output: informational only (stderr warnings)
+#   - Exit 0: always (postToolUse cannot deny)
+#
 # INSTALL: cpto hooks install post-write-token-diff
-# Or manually: copy to .github/hooks/post-write-token-diff.sh
 #
 # CONFIGURE (optional):
 #   CPTO_WRITE_ADVISORY_TOKENS — cumulative threshold for advisory (default: 5000)
 
-LOG_FILE=".github/sessions/write-log.md"
+LOG_FILE=".cpto/sessions/write-log.md"
 ADVISORY_THRESHOLD="${CPTO_WRITE_ADVISORY_TOKENS:-5000}"
 DATE=$(date +%Y-%m-%d)
 TIME=$(date +%H:%M)
 
-# Only fire on Write or Edit tool completions
-TOOL_NAME="${COPILOT_TOOL_NAME:-}"
-if [ "$TOOL_NAME" != "Write" ] && [ "$TOOL_NAME" != "Edit" ]; then
-  exit 0
-fi
-
-# Get file path from stdin JSON (tool input is passed via stdin for PostToolUse)
-# GitHub Copilot passes {"tool_name": "...", "tool_input": {"file_path": "..."}, ...}
-FILE_PATH=$(cat /dev/stdin 2>/dev/null | python3 -c "
+# Get file path and tool name from stdin JSON
+INPUT=$(cat /dev/stdin 2>/dev/null)
+PARSED=$(echo "$INPUT" | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    path = data.get('tool_input', {}).get('file_path', '')
-    print(path)
+    tool = data.get('toolName', '')
+    args = data.get('toolArgs', data.get('tool_input', {}))
+    if isinstance(args, str):
+        import json as j
+        args = j.loads(args)
+    path = args.get('filePath', args.get('file_path', ''))
+    print(f'{tool}\t{path}')
 except:
-    pass
+    print('\t')
 " 2>/dev/null)
+
+TOOL_NAME=$(echo "$PARSED" | cut -f1)
+FILE_PATH=$(echo "$PARSED" | cut -f2)
 
 if [ -z "$FILE_PATH" ] || [ ! -f "$FILE_PATH" ]; then
   exit 0

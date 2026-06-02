@@ -181,7 +181,7 @@ npx @edixos/copilot-token-optimizer audit --json
 
 ## Helper Scripts
 
-GitHub Copilot does **not** expose a native CLI hook settings file. Instead, `cpto hooks` installs optional helper scripts into `.github/hooks/` and prints a JSON manifest you can wire into VS Code tasks, shell wrappers, or CI.
+GitHub Copilot does **not** expose a native CLI hook settings file. Instead, `cpto hooks` installs optional helper scripts into `.github/scripts/copilot-hooks/` and prints a JSON manifest you can wire into VS Code tasks, shell wrappers, or CI.
 
 ### Available Templates
 

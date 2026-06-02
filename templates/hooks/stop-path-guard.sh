@@ -1,19 +1,24 @@
 #!/bin/bash
 # stop-path-guard.sh
-# EVENT: Stop
+# EVENT: agentStop
 # DESCRIPTION: Exit 2 if the last assistant turn references file paths that don't exist
 #
-# GitHub Copilot Stop hook: scans the last assistant turn for backtick-wrapped
-# file paths and verifies they exist on disk. If any mentioned path is missing,
-# exits 2 — forcing Copilot to self-correct before the turn completes.
+# Native GitHub Copilot agentStop hook: scans the last assistant turn for
+# backtick-wrapped file paths and verifies they exist on disk. If any mentioned
+# path is missing, exits 2 — forcing Copilot to self-correct.
+#
+# Input: JSON on stdin with session context (may include transcript_path)
+# Output: stderr diagnostics
+#   - Exit 0: all paths valid
+#   - Exit 2: one or more paths missing
 #
 # INSTALL: cpto hooks install stop-path-guard
-# Or manually: copy to .github/hooks/stop-path-guard.sh
 #
 # CONFIGURE (optional):
 #   CPTO_PATH_GUARD_DISABLE=1  — bypass all checks
 
 if [ "${CPTO_PATH_GUARD_DISABLE:-0}" = "1" ]; then
+  cat > /dev/null
   exit 0
 fi
 

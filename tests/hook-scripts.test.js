@@ -29,58 +29,60 @@ function runHook(scriptName, stdinObj, env = {}, cwd = ROOT) {
 
 describe('pre-tool-bash-guard', () => {
   const SCRIPT = 'pre-tool-bash-guard.sh';
-  const bashInput = (cmd) => ({ tool_name: 'Bash', tool_input: { command: cmd } });
 
-  it('exits 0 for non-Bash tool', () => {
-    const r = runHook(SCRIPT, { tool_name: 'Read', tool_input: { file_path: '/etc' } },
-      { COPILOT_TOOL_NAME: 'Read' });
+  it('exits 0 for non-matching tool input (no command field)', () => {
+    const r = runHook(SCRIPT, { toolName: 'read_file', toolArgs: { filePath: '/etc' } });
     assert.strictEqual(r.code, 0);
   });
 
-  it('exits 2 and explains for find /', () => {
-    const r = runHook(SCRIPT, bashInput('find / -name "*.md"'), { COPILOT_TOOL_NAME: 'Bash' });
+  it('exits 2 and outputs deny JSON for find /', () => {
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'find / -name "*.md"' } });
     assert.strictEqual(r.code, 2);
-    assert.ok(r.stderr.includes('find /'), `expected 'find /' in: ${r.stderr}`);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.permissionDecision, 'deny');
+    assert.ok(out.permissionDecisionReason.includes('find /'), `expected 'find /' in reason`);
   });
 
   it('exits 2 for cat node_modules/', () => {
-    const r = runHook(SCRIPT, bashInput('cat node_modules/lodash/index.js'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'cat node_modules/lodash/index.js' } });
     assert.strictEqual(r.code, 2);
-    assert.ok(r.stderr.includes('node_modules'), `stderr: ${r.stderr}`);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.permissionDecision, 'deny');
+    assert.ok(out.permissionDecisionReason.includes('node_modules'), `reason: ${out.permissionDecisionReason}`);
   });
 
   it('exits 0 with warning for find . without -maxdepth', () => {
-    const r = runHook(SCRIPT, bashInput('find . -name "*.js"'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'find . -name "*.js"' } });
     assert.strictEqual(r.code, 0);
     assert.ok(r.stderr.includes('maxdepth'), `expected maxdepth warning, got: ${r.stderr}`);
   });
 
   it('exits 0 with warning for cat *.json', () => {
-    const r = runHook(SCRIPT, bashInput('cat *.json'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'cat *.json' } });
     assert.strictEqual(r.code, 0);
     assert.ok(r.stderr.includes('Large output'), `stderr: ${r.stderr}`);
   });
 
   it('exits 0 with warning for find . targeting .log files', () => {
-    const r = runHook(SCRIPT, bashInput('find . -name "*.log"'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'find . -name "*.log"' } });
     assert.strictEqual(r.code, 0);
     assert.ok(r.stderr.includes('log'), `stderr: ${r.stderr}`);
   });
 
   it('exits 0 cleanly for safe find with -maxdepth', () => {
-    const r = runHook(SCRIPT, bashInput('find . -maxdepth 3 -name "*.ts"'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'find . -maxdepth 3 -name "*.ts"' } });
     assert.strictEqual(r.code, 0);
     assert.strictEqual(r.stderr, '');
   });
 
   it('exits 0 cleanly for grep with path scope', () => {
-    const r = runHook(SCRIPT, bashInput('grep -r "pattern" src/'), { COPILOT_TOOL_NAME: 'Bash' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'grep -r "pattern" src/' } });
     assert.strictEqual(r.code, 0);
   });
 
   it('bypasses all checks when CPTO_BASH_GUARD_DISABLE=1', () => {
-    const r = runHook(SCRIPT, bashInput('find / -name "*.md"'),
-      { COPILOT_TOOL_NAME: 'Bash', CPTO_BASH_GUARD_DISABLE: '1' });
+    const r = runHook(SCRIPT, { toolName: 'bash', toolArgs: { command: 'find / -name "*.md"' } },
+      { CPTO_BASH_GUARD_DISABLE: '1' });
     assert.strictEqual(r.code, 0);
     assert.strictEqual(r.stderr, '');
   });
@@ -95,7 +97,7 @@ describe('notification-token-display', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-notif-'));
     fs.mkdirSync(path.join(tmpDir, '.github'), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.github', 'sessions'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.cpto', 'sessions'), { recursive: true });
     // Create a minimal .github/copilot-instructions.md so token count is non-zero
     fs.writeFileSync(path.join(tmpDir, '.github/copilot-instructions.md'), 'This is a test project. '.repeat(50));
   });
@@ -113,7 +115,7 @@ describe('notification-token-display', () => {
 
   it('exits silently on second notification same day', () => {
     const today = execSync('date +%Y-%m-%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.github', 'sessions', `.notification-shown-${today}`);
+    const marker = path.join(tmpDir, '.cpto', 'sessions', `.notification-shown-${today}`);
     fs.writeFileSync(marker, '');
 
     const r = runHook(SCRIPT, { message: 'Another notification' }, {}, tmpDir);
@@ -123,7 +125,7 @@ describe('notification-token-display', () => {
 
   it('creates session marker after first notification', () => {
     const today = execSync('date +%Y-%m-%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.github', 'sessions', `.notification-shown-${today}`);
+    const marker = path.join(tmpDir, '.cpto', 'sessions', `.notification-shown-${today}`);
     assert.ok(!fs.existsSync(marker), 'marker should not exist before');
     runHook(SCRIPT, { message: 'test' }, {}, tmpDir);
     assert.ok(fs.existsSync(marker), 'marker should exist after first notification');
@@ -139,7 +141,7 @@ describe('user-prompt-ghost-scanner', () => {
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-ghost-'));
     fs.mkdirSync(path.join(tmpDir, '.github'), { recursive: true });
-    fs.mkdirSync(path.join(tmpDir, '.github', 'sessions'), { recursive: true });
+    fs.mkdirSync(path.join(tmpDir, '.cpto', 'sessions'), { recursive: true });
   });
 
   afterEach(() => {
@@ -148,7 +150,7 @@ describe('user-prompt-ghost-scanner', () => {
 
   function writeLog(entries) {
     const content = entries.map((e, i) => `## Session ${i + 1}\n\n${e}\n`).join('\n');
-    fs.writeFileSync(path.join(tmpDir, '.github', 'sessions', 'token-log.md'), content);
+    fs.writeFileSync(path.join(tmpDir, '.cpto', 'sessions', 'token-log.md'), content);
   }
 
   function writeCopilotMd(content) {
@@ -192,7 +194,7 @@ describe('user-prompt-ghost-scanner', () => {
 
   it('exits silently on second run same day (marker file)', () => {
     const today = execSync('date +%Y%m%d', { encoding: 'utf8' }).trim();
-    const marker = path.join(tmpDir, '.github', 'sessions', `.ghost-checked-${today}`);
+    const marker = path.join(tmpDir, '.cpto', 'sessions', `.ghost-checked-${today}`);
     fs.writeFileSync(marker, '');
     const sessions = Array.from({ length: 6 }, () => 'no relevant content here');
     writeLog(sessions);

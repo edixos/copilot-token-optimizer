@@ -1,20 +1,25 @@
 #!/bin/bash
 # user-prompt-validate-copilot-instructions.sh
-# EVENT: UserPromptSubmit
+# EVENT: userPromptSubmitted
 # DESCRIPTION: Validate .github/copilot-instructions.md structure once per session, inject warnings
 #
-# GitHub Copilot UserPromptSubmit hook: validates .github/copilot-instructions.md structure once per
-# session. Issues are injected via stdout (Copilot sees them) and printed to
-# stderr (user sees them). Clean .github/copilot-instructions.md produces no output.
+# Native GitHub Copilot userPromptSubmitted hook: validates .github/copilot-instructions.md
+# structure once per session. Issues are injected via stdout (Copilot sees them) and
+# printed to stderr (user sees them). Clean file produces no output.
+#
+# Input: JSON on stdin with { prompt, ... }
+# Output: stdout text is injected as context (validation warnings)
 #
 # INSTALL: cpto hooks install user-prompt-validate-copilot-instructions
-# Or manually: copy to .github/hooks/user-prompt-validate-copilot-instructions.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_COPILOT_MD_PATH       — path to .github/copilot-instructions.md (default: .github/copilot-instructions.md)
 #   CPTO_TOKEN_WARN_THRESHOLD — token count warning threshold (default: 600)
 
-MARKER=".github/sessions/.copilot-instructions-validated-$(date +%Y-%m-%d)"
+# Consume stdin (we don't need the prompt for validation)
+cat > /dev/null
+
+MARKER=".cpto/sessions/.copilot-instructions-validated-$(date +%Y-%m-%d)"
 COPILOT_MD="${CPTO_COPILOT_MD_PATH:-.github/copilot-instructions.md}"
 TOKEN_THRESHOLD="${CPTO_TOKEN_WARN_THRESHOLD:-600}"
 
@@ -23,7 +28,7 @@ if [ -f "$MARKER" ]; then
   exit 0
 fi
 
-mkdir -p ".github/sessions"
+mkdir -p ".cpto/sessions"
 touch "$MARKER"
 
 # .github/copilot-instructions.md missing — silent, not an error (project may not use cpto)
@@ -55,7 +60,7 @@ completed_headers = [
 if completed_headers:
     for h in completed_headers:
         lineno = lines.index(h) + 1
-        issues.append(f'Completed tasks in .github/copilot-instructions.md (line {lineno}: "{h.strip()}"). Move to .github/completions/')
+        issues.append(f'Completed tasks in .github/copilot-instructions.md (line {lineno}: "{h.strip()}"). Move to .cpto/completions/')
 
 # Check 3: Session notes embedded (date headers like ## 2026-05-20)
 date_headers = [
@@ -64,7 +69,7 @@ date_headers = [
 ]
 if date_headers:
     for lineno, h in date_headers:
-        issues.append(f'Session note embedded (line {lineno}: "{h.strip()}"). Move to .github/sessions/archive/')
+        issues.append(f'Session note embedded (line {lineno}: "{h.strip()}"). Move to .cpto/sessions/archive/')
 
 # Check 4: Large inline content that should be @ imports
 # Flag if any section is >200 words (suggests copy-pasted content)

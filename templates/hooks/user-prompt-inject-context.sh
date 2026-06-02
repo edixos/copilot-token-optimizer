@@ -1,14 +1,16 @@
 #!/bin/bash
 # user-prompt-inject-context.sh
-# EVENT: UserPromptSubmit
+# EVENT: userPromptSubmitted
 # DESCRIPTION: Auto-inject matching docs/learnings/ files based on prompt keywords
 #
-# GitHub Copilot UserPromptSubmit hook: auto-loads topic docs from docs/learnings/
-# based on keywords in the user's prompt. stdout is injected as context Copilot
-# sees before answering — zero token cost when the file isn't relevant.
+# Native GitHub Copilot userPromptSubmitted hook: auto-loads topic docs from
+# docs/learnings/ based on keywords in the user's prompt. Stdout content is
+# injected as additional context Copilot sees before answering.
+#
+# Input: JSON on stdin with { prompt, ... }
+# Output: stdout text is injected as context for the agent
 #
 # INSTALL: cpto hooks install user-prompt-inject-context
-# Or manually: copy to .github/hooks/user-prompt-inject-context.sh
 #
 # CONFIGURE (optional env vars):
 #   CPTO_LEARNINGS_DIR    — path to learnings dir (default: docs/learnings)

@@ -1,10 +1,16 @@
 #!/bin/bash
 # pre-tool-bash-guard.sh
-# EVENT: PreToolUse
+# EVENT: preToolUse
+# MATCHER: bash
 # DESCRIPTION: Block dangerous Bash patterns that fill context (find /, cat node_modules, etc.)
 #
-# GitHub Copilot PreToolUse hook: intercepts Bash tool calls and blocks or warns
-# on commands likely to produce massive output and exhaust context.
+# Native GitHub Copilot preToolUse hook: intercepts bash tool calls and blocks or
+# warns on commands likely to produce massive output and exhaust context.
+#
+# Input: JSON on stdin with { toolName: "bash", toolArgs: { command: "..." }, ... }
+# Output: JSON to stdout for deny decisions
+#   - Exit 0: allow
+#   - Exit 2: deny the tool call
 #
 # Blocked (exit 2): find from /, cat node_modules, bare recursive grep with no path
 # Warned (exit 0 + stderr): log file globs, glob cat, unscoped find without -maxdepth
@@ -13,20 +19,20 @@
 #   CPTO_BASH_GUARD_DISABLE=1  — bypass all checks
 
 if [ "${CPTO_BASH_GUARD_DISABLE:-0}" = "1" ]; then
+  cat > /dev/null
   exit 0
 fi
 
-# Only intercept Bash tool calls
-TOOL_NAME="${COPILOT_TOOL_NAME:-}"
-if [ "$TOOL_NAME" != "Bash" ]; then
-  exit 0
-fi
-
+# Read stdin JSON to extract the command
 CMD=$(cat | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    print(data.get('tool_input', {}).get('command', ''))
+    args = data.get('toolArgs', data.get('tool_input', {}))
+    if isinstance(args, str):
+        import json as j
+        args = j.loads(args)
+    print(args.get('command', ''))
 except Exception:
     pass
 " 2>/dev/null)
@@ -38,22 +44,18 @@ fi
 # ── BLOCKED PATTERNS (exit 2) ────────────────────────────────────────────
 
 if echo "$CMD" | grep -qE 'find\s+/(\s|$)'; then
-  echo "🚫 Bash scope guard: 'find /' searches the full filesystem." >&2
-  echo "   This produces thousands of results and fills your context." >&2
-  echo "   Use: find . -maxdepth 3 ...  instead." >&2
+  echo '{"permissionDecision":"deny","permissionDecisionReason":"find / searches the full filesystem. Use: find . -maxdepth 3 instead."}'
   exit 2
 fi
 
 if echo "$CMD" | grep -qE 'cat\s+.*node_modules/'; then
-  echo "🚫 Bash scope guard: reading node_modules/ files wastes significant context." >&2
-  echo "   Check package docs or use: npm info <package>  instead." >&2
+  echo '{"permissionDecision":"deny","permissionDecisionReason":"Reading node_modules/ wastes context. Use: npm info <package> instead."}'
   exit 2
 fi
 
 # bare grep -r "pattern" with no path (pattern ends the command)
 if echo "$CMD" | grep -qP '(?:^|\|)\s*grep\s+(?:-\w*[rR]\w*|-[^\s]*[rR])\s+"[^"]+"\s*$' 2>/dev/null; then
-  echo "🚫 Bash scope guard: 'grep -r' without a path scope scans the entire tree." >&2
-  echo "   Add a path: grep -r \"pattern\" src/  or  grep -r \"pattern\" ." >&2
+  echo '{"permissionDecision":"deny","permissionDecisionReason":"grep -r without a path scans the entire tree. Add a path: grep -r pattern src/"}'
   exit 2
 fi
 

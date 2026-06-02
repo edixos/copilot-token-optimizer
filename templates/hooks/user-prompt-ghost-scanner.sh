@@ -1,26 +1,32 @@
 #!/bin/bash
 # user-prompt-ghost-scanner.sh
-# EVENT: UserPromptSubmit
+# EVENT: userPromptSubmitted
 # DESCRIPTION: Detect .github/copilot-instructions.md sections never referenced in recent sessions and suggest pruning
 #
-# GitHub Copilot UserPromptSubmit hook: scans .github/sessions/token-log.md for session entries,
-# extracts section headers from .github/copilot-instructions.md, and flags sections with zero references across
-# the last 10+ sessions as "ghost tokens" worth pruning.
+# Native GitHub Copilot userPromptSubmitted hook: scans .cpto/sessions/token-log.md
+# for session entries, extracts section headers from .github/copilot-instructions.md,
+# and flags sections with zero references across the last 10+ sessions as "ghost tokens".
 #
-# stdout is injected as context Copilot sees. Output is silent when:
-#   - token-log.md has fewer than 5 sessions
-#   - all sections are referenced
-#   - .github/copilot-instructions.md doesn't exist
-#   - already ran today (daily marker)
+# Input: JSON on stdin with { prompt, ... }
+# Output: stdout text is injected as context (pruning suggestions)
+#
+# Silent when: token-log.md has fewer than 5 sessions, all sections referenced,
+# .github/copilot-instructions.md doesn't exist, or already ran today.
+#
+# INSTALL: cpto hooks install user-prompt-ghost-scanner
 #
 # Override: CPTO_GHOST_SCAN_DISABLE=1
 
 if [ "${CPTO_GHOST_SCAN_DISABLE:-0}" = "1" ]; then
+  cat > /dev/null
   exit 0
 fi
 
-SESSION_MARKER=".github/sessions/.ghost-checked-$(date +%Y%m%d)"
-TOKEN_LOG=".github/sessions/token-log.md"
+# Consume stdin (we don't need the prompt content for this check)
+cat > /dev/null
+
+SESSION_MARKER=".cpto/sessions/.ghost-checked-$(date +%Y%m%d)"
+TOKEN_LOG=".cpto/sessions/token-log.md"
 COPILOT_MD=".github/copilot-instructions.md"
 
 # Run once per day
@@ -33,7 +39,7 @@ if [ ! -f "$TOKEN_LOG" ] || [ ! -f "$COPILOT_MD" ]; then
   exit 0
 fi
 
-mkdir -p ".github/sessions"
+mkdir -p ".cpto/sessions"
 touch "$SESSION_MARKER"
 
 python3 - "$TOKEN_LOG" "$COPILOT_MD" << 'PYEOF'

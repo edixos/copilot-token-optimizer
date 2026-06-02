@@ -345,5 +345,11 @@ describe('e2e — subprocess', () => {
     for (const f of templates) {
       assert.ok(fs.existsSync(path.join(hooksDir, f)), `${f} should be installed by --hooks`);
     }
+    // Verify native hook config JSON was generated
+    const configPath = path.join(tmpDir, '.github', 'hooks', 'cpto-token-optimizer.json');
+    assert.ok(fs.existsSync(configPath), 'native hook config should be created by --hooks');
+    const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    assert.equal(config.version, 1, 'config should have version 1');
+    assert.ok(config.hooks, 'config should have hooks block');
   });
 });

@@ -8,6 +8,24 @@ import { HOOKS_DIR, HOOKS_SCRIPTS_DIR, PACKAGE_NAME } from '../lib/paths.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const TEMPLATES_DIR = path.resolve(__dirname, '../../templates/hooks');
 const HOOKS_SCRIPTS_INSTALL_DIR = path.join(process.cwd(), HOOKS_SCRIPTS_DIR);
+const HOOKS_CONFIG_FILE = 'cpto-token-optimizer.json';
+
+// Map template EVENT metadata (PascalCase / legacy) → native camelCase hook event names
+// Reference: https://docs.github.com/en/copilot/reference/hooks-reference#hook-events
+const EVENT_MAP = {
+  PreToolUse: 'preToolUse',
+  PostToolUse: 'postToolUse',
+  UserPromptSubmit: 'userPromptSubmitted',
+  Stop: 'agentStop',
+  Notification: 'notification',
+  SessionStart: 'sessionStart',
+  SessionEnd: 'sessionEnd',
+  ErrorOccurred: 'errorOccurred',
+};
+
+export function mapEventToNative(event) {
+  return EVENT_MAP[event] ?? event;
+}
 
 // --- Pure functions (no fs, no console, no process) ---
 
@@ -17,29 +35,39 @@ export function parseHookMeta(content) {
   return { event, desc };
 }
 
-export function buildSettingsBlock(installedHooks) {
+export function buildNativeHooksConfig(installedHooks) {
   const byEvent = {};
   for (const hook of installedHooks) {
-    if (!byEvent[hook.event]) byEvent[hook.event] = [];
-    byEvent[hook.event].push(hook);
+    const nativeEvent = mapEventToNative(hook.event);
+    if (!byEvent[nativeEvent]) byEvent[nativeEvent] = [];
+    byEvent[nativeEvent].push(hook);
   }
   const hooksBlock = {};
   for (const [event, hooks] of Object.entries(byEvent)) {
-    hooksBlock[event] = hooks.map(h => ({
-      hooks: [{ type: 'command', command: `bash ${HOOKS_SCRIPTS_DIR}/${h.file}` }],
-    }));
+    hooksBlock[event] = hooks.map(h => {
+      const entry = {
+        type: 'command',
+        bash: `./${HOOKS_SCRIPTS_DIR}/${h.file}`,
+        cwd: '.',
+        timeoutSec: 30,
+      };
+      // preToolUse hooks can use matcher to filter tool names
+      if (event === 'preToolUse' && h.matcher) {
+        entry.matcher = h.matcher;
+      }
+      return entry;
+    });
   }
-  return {
-    tool: PACKAGE_NAME,
-    kind: 'helper-script-manifest',
-    note: 'GitHub Copilot has no native CLI hook settings file; use these commands from VS Code tasks, wrapper scripts, or CI.',
-    hooks: hooksBlock,
-  };
+  return { version: 1, hooks: hooksBlock };
 }
 
+// Legacy alias for tests that import buildSettingsBlock
+export const buildSettingsBlock = buildNativeHooksConfig;
+
 export function formatHookLine(hook) {
+  const nativeEvent = mapEventToNative(hook.event);
   const status = hook.installed ? chalk.green('[installed]  ') : chalk.gray('[not installed]');
-  const event = chalk.cyan(hook.event.padEnd(20));
+  const event = chalk.cyan(nativeEvent.padEnd(20));
   return `  ${hook.name.padEnd(38)} ${status} ${event} ${hook.desc}`;
 }
 
@@ -53,13 +81,25 @@ export function readTemplates(templatesDir, installDir) {
       const content = fs.readFileSync(path.join(templatesDir, f), 'utf8');
       const { event, desc } = parseHookMeta(content);
       const installed = fs.existsSync(path.join(installDir, f));
-      return { name: f.replace('.sh', ''), file: f, event, desc, installed };
+      // Extract matcher from template if present
+      const matcherMatch = content.match(/^# MATCHER:\s*(.+)$/m);
+      const matcher = matcherMatch ? matcherMatch[1].trim() : undefined;
+      return { name: f.replace('.sh', ''), file: f, event, desc, installed, matcher };
     });
 }
 
 function confirm(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => rl.question(question, ans => { rl.close(); resolve(ans); }));
+}
+
+// Write the native .github/hooks/cpto-token-optimizer.json config
+export function writeNativeConfig(hooksDir, installedHooks) {
+  const config = buildNativeHooksConfig(installedHooks);
+  fs.mkdirSync(hooksDir, { recursive: true });
+  const configPath = path.join(hooksDir, HOOKS_CONFIG_FILE);
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n', 'utf8');
+  return configPath;
 }
 
 // --- Subcommand handlers ---
@@ -79,6 +119,8 @@ export function listHooks(templatesDir, installDir) {
 
 export function installHook(name, templatesDir, installDir, opts) {
   const templates = readTemplates(templatesDir, installDir);
+  // Derive hooks config dir: installDir is .github/scripts/copilot-hooks/ → .github/hooks/
+  const configDir = path.resolve(installDir, '..', '..', 'hooks');
   if (opts?.all) {
     fs.mkdirSync(installDir, { recursive: true });
     for (const hook of templates) {
@@ -87,8 +129,11 @@ export function installHook(name, templatesDir, installDir, opts) {
       fs.chmodSync(dst, 0o755);
       console.log(chalk.green(`✓ Installed: ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
     }
+    // Write native hook configuration
+    const configPath = writeNativeConfig(configDir, templates);
+    console.log(chalk.green(`✓ Config:    ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
     console.log(chalk.bold(`\n${templates.length} hooks installed.`));
-    console.log(chalk.dim('Run: cpto hooks settings  to print a helper-script manifest'));
+    console.log(chalk.dim(`Native config written to ${path.relative(process.cwd(), configPath)}`));
     return;
   }
   if (!name) {
@@ -106,7 +151,10 @@ export function installHook(name, templatesDir, installDir, opts) {
   fs.copyFileSync(path.join(templatesDir, hook.file), dst);
   fs.chmodSync(dst, 0o755);
   console.log(chalk.green(`✓ Installed: ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
-  _printSettingsHint(hook);
+  // Regenerate native config with current installed set
+  const installed = readTemplates(templatesDir, installDir).filter(t => t.installed);
+  writeNativeConfig(configDir, installed);
+  console.log(chalk.green(`✓ Updated:   ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
 }
 
 export async function removeHook(name, installDir, opts) {
@@ -125,6 +173,20 @@ export async function removeHook(name, installDir, opts) {
   }
   fs.unlinkSync(dst);
   console.log(chalk.green(`✓ Removed: ${HOOKS_SCRIPTS_DIR}/${name}.sh`));
+  // Regenerate native config without the removed hook
+  const configDir = path.resolve(installDir, '..', '..', 'hooks');
+  const templatesDir = TEMPLATES_DIR;
+  const remaining = readTemplates(templatesDir, installDir).filter(t => t.installed);
+  if (remaining.length > 0) {
+    writeNativeConfig(configDir, remaining);
+    console.log(chalk.green(`✓ Updated:   ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
+  } else {
+    const configPath = path.join(configDir, HOOKS_CONFIG_FILE);
+    if (fs.existsSync(configPath)) {
+      fs.unlinkSync(configPath);
+      console.log(chalk.dim(`  Removed empty config: ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
+    }
+  }
 }
 
 export function statusHooks(templatesDir, installDir) {
@@ -138,7 +200,12 @@ export function statusHooks(templatesDir, installDir) {
   for (const t of installed) {
     const stat = fs.statSync(path.join(installDir, t.file));
     const age = Math.round((Date.now() - stat.mtimeMs) / 60000);
-    console.log(`  ${chalk.green('✓')} ${t.name.padEnd(38)} ${chalk.cyan(t.event.padEnd(20))} modified ${age}m ago`);
+    const nativeEvent = mapEventToNative(t.event);
+    console.log(`  ${chalk.green('✓')} ${t.name.padEnd(38)} ${chalk.cyan(nativeEvent.padEnd(20))} modified ${age}m ago`);
+  }
+  const configPath = path.join(process.cwd(), HOOKS_DIR, HOOKS_CONFIG_FILE);
+  if (fs.existsSync(configPath)) {
+    console.log(chalk.dim(`\n  Native config: ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
   }
 }
 
@@ -149,11 +216,12 @@ export function settingsHooks(templatesDir, installDir) {
     console.log('No hooks installed. Run: cpto hooks install --all  first.');
     return;
   }
-  const output = JSON.stringify(buildSettingsBlock(installed), null, 2);
+  const config = buildNativeHooksConfig(installed);
+  const output = JSON.stringify(config, null, 2);
   console.log(output);
   if (process.stdout.isTTY) {
-    console.log(chalk.dim('\nGitHub Copilot does not expose a native CLI hook settings file.'));
-    console.log(chalk.dim('Use this JSON as a manifest for VS Code tasks, wrapper scripts, or CI.'));
+    console.log(chalk.dim(`\nThis JSON is written to ${HOOKS_DIR}/${HOOKS_CONFIG_FILE}`));
+    console.log(chalk.dim('Copilot CLI loads it automatically from .github/hooks/ on session start.'));
   }
 }
 
@@ -173,10 +241,4 @@ export async function hooksCommand(sub, name, opts) {
   console.error(chalk.red(`Unknown subcommand: ${sub}`));
   console.error('Usage: cpto hooks [list|install|remove|status|settings]');
   process.exit(1);
-}
-
-function _printSettingsHint(hook) {
-  console.log(chalk.dim('\nGitHub Copilot does not expose a native CLI hook settings file.'));
-  console.log(chalk.dim('Run this helper script from a VS Code task, wrapper, or CI step:'));
-  console.log(chalk.dim(`  bash ${HOOKS_SCRIPTS_DIR}/${hook.file}`));
 }

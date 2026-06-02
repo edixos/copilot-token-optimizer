@@ -340,19 +340,15 @@ export function printNextSteps() {
 
 export async function maybeInstallHooks(installHooks, yes) {
   if (installHooks) {
-    console.log(chalk.blue('🪝 Installing GitHub Copilot helper scripts...'));
+    console.log(chalk.blue('🪝 Installing native GitHub Copilot hooks...'));
     await hooksCommand('install', null, { all: true });
-    console.log('');
-    console.log(chalk.dim('GitHub Copilot does not expose native pre/post tool hooks in the CLI.'));
-    console.log(chalk.dim('Use these scripts from VS Code tasks, wrapper commands, or CI:'));
-    await hooksCommand('settings');
     console.log('');
     return;
   }
   if (!yes) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const ans = await new Promise(resolve => rl.question(
-      chalk.blue('🪝 Install GitHub Copilot helper scripts for token monitoring? (y/N) '),
+      chalk.blue('🪝 Install native GitHub Copilot hooks for token monitoring? (y/N) '),
       resolve
     ));
     rl.close();
@@ -360,10 +356,6 @@ export async function maybeInstallHooks(installHooks, yes) {
     if (ans.trim().toLowerCase() === 'y') {
       console.log(chalk.blue('Installing hooks...'));
       await hooksCommand('install', null, { all: true });
-      console.log('');
-      console.log(chalk.dim('GitHub Copilot does not expose native pre/post tool hooks in the CLI.'));
-      console.log(chalk.dim('Use these scripts from VS Code tasks, wrapper commands, or CI:'));
-      await hooksCommand('settings');
       console.log('');
     } else {
       console.log(chalk.dim('Skipped. Run: cpto hooks install --all  to add later.'));

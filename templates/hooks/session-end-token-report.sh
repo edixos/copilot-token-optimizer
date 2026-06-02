@@ -1,23 +1,28 @@
 #!/bin/bash
 # session-end-token-report.sh
-# EVENT: PostToolUse
-# DESCRIPTION: Append session token estimate to .github/sessions/token-log.md
+# EVENT: sessionEnd
+# DESCRIPTION: Append session token estimate to .cpto/sessions/token-log.md
 #
-# Opt-in GitHub Copilot session-end hook.
-# Appends a token usage estimate to .github/sessions/token-log.md
+# Native GitHub Copilot sessionEnd hook.
+# Appends a token usage estimate to .cpto/sessions/token-log.md
 #
-# INSTALL: Copy to .github/hooks/session-end-token-report.sh
-# and ensure it is referenced in your GitHub Copilot settings.
+# Input: JSON on stdin with session context
+# Output: informational only
+#
+# INSTALL: cpto hooks install session-end-token-report
 
-LOG_FILE=".github/sessions/token-log.md"
+# Consume stdin
+cat > /dev/null
+
+LOG_FILE=".cpto/sessions/token-log.md"
 DATE=$(date +%Y-%m-%d)
 TIME=$(date +%H:%M)
 
 # Count tokens in auto-loadable files (word count × 1.3 as proxy)
 WORD_COUNT=$(find . -maxdepth 3 \
   \( -name "*.md" -path "./.github/*.md" -o -path "./.github/copilot-instructions.md" \) \
-  -not -path "./.github/completions/*" \
-  -not -path "./.github/sessions/*" \
+  -not -path "./.cpto/completions/*" \
+  -not -path "./.cpto/sessions/*" \
   2>/dev/null | xargs wc -w 2>/dev/null | tail -1 | awk '{print $1}')
 
 APPROX_TOKENS=$(echo "$WORD_COUNT * 1.3 / 1" | bc 2>/dev/null || echo "?")

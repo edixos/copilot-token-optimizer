@@ -1,28 +1,36 @@
 #!/bin/bash
 # notification-token-display.sh
-# EVENT: Notification
+# EVENT: notification
 # DESCRIPTION: Show auto-loaded token estimate once per session on first notification
 #
-# GitHub Copilot Notification hook: appends a token budget summary to the first
-# notification of each session. Subsequent notifications exit silently.
-# Cached in .github/sessions/.notification-token-cache to avoid recomputing.
+# Native GitHub Copilot notification hook: appends a token budget summary to the
+# first notification of each session. Subsequent notifications exit silently.
+# Cached in .cpto/sessions/.notification-token-cache to avoid recomputing.
+#
+# Input: JSON on stdin with notification context
+# Output: stderr informational message
+#
+# INSTALL: cpto hooks install notification-token-display
 
-CACHE_FILE=".github/sessions/.notification-token-cache"
-SESSION_MARKER=".github/sessions/.notification-shown-$(date +%Y-%m-%d)"
+# Consume stdin
+cat > /dev/null
+
+CACHE_FILE=".cpto/sessions/.notification-token-cache"
+SESSION_MARKER=".cpto/sessions/.notification-shown-$(date +%Y-%m-%d)"
 
 # Already shown today — stay silent
 if [ -f "$SESSION_MARKER" ]; then
   exit 0
 fi
 
-mkdir -p ".github/sessions"
+mkdir -p ".cpto/sessions"
 
 # Compute token estimate if cache missing or stale (older than today)
 if [ ! -f "$CACHE_FILE" ] || [ "$(find "$CACHE_FILE" -mtime +0 2>/dev/null)" ]; then
   WORD_COUNT=$(find . -maxdepth 3 \
     \( -name "*.md" -path "./.github/*.md" -o -path "./.github/copilot-instructions.md" -o -path "./docs/INDEX.md" \) \
-    -not -path "./.github/completions/*" \
-    -not -path "./.github/sessions/*" \
+    -not -path "./.cpto/completions/*" \
+    -not -path "./.cpto/sessions/*" \
     2>/dev/null | xargs wc -w 2>/dev/null | tail -1 | awk '{print $1}')
   WORD_COUNT="${WORD_COUNT:-0}"
   APPROX_TOKENS=$(echo "$WORD_COUNT * 13 / 10" | bc 2>/dev/null || echo "0")
