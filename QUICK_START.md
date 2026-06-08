@@ -71,6 +71,16 @@ cpto hooks settings
 
 The `settings` command prints a JSON manifest for wiring those scripts into VS Code tasks, shell wrappers, or CI.
 
+If you want prompt compression for a wrapper-based setup, `user-prompt-optimize.sh` is included as an opt-in template. It stays inactive until you set `CPTO_PROMPT_OPTIMIZER_ENABLED=1`, and by default it emits plain text rather than JSON.
+
+It discovers skill candidates from local manifests and workspace signals, so it can adapt to different project types without a hard-coded skill list. Its logs stay compact in:
+
+- `.copilot-runtime/prompt-optimizer.ndjson`
+- `.copilot-runtime/prompt-optimizer-daily.ndjson`
+- `.copilot-runtime/prompt-optimizer-daily.md`
+
+If you want the credit estimate to match a specific Copilot model, set `CPTO_PROMPT_OPTIMIZER_CREDIT_MODEL` before enabling the hook. The pricing is model-accurate, while the token count is still estimated from the prompt text unless your wrapper supplies usage data.
+
 ## Manual Prompt-Based Setup
 
 If you prefer to have Copilot create the structure from a chat prompt instead of the CLI:

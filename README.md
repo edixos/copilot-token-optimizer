@@ -196,6 +196,7 @@ templates/hooks/
 ├── user-prompt-inject-snapshot.sh
 ├── user-prompt-validate-copilot-instructions.sh
 ├── user-prompt-ghost-scanner.sh
+├── user-prompt-optimize.sh
 ├── stop-session-snapshot.sh
 ├── stop-path-guard.sh
 └── notification-token-display.sh
@@ -214,7 +215,31 @@ The `settings` command prints a machine-readable manifest of installed scripts a
 
 - `pre-tool-token-guard.sh` warns when the measured working set gets too large.
 - `user-prompt-inject-context.sh` matches user prompts to files in `docs/learnings/` and prints a lightweight context payload you can pipe into wrappers.
+- `user-prompt-optimize.sh` is an optional prompt compressor for wrapper-based setups. It stays off by default, only runs when `CPTO_PROMPT_OPTIMIZER_ENABLED=1`, and can emit plain text or JSON depending on `CPTO_PROMPT_OPTIMIZER_OUTPUT_FORMAT`.
 - `post-write-token-diff.sh` records write sizes in `.copilot/sessions/write-log.md`.
+
+### Optional Prompt Compression
+
+`user-prompt-optimize.sh` is the only helper script in this package that reaches out to an external model. That makes it useful for teams that want prompt normalization and skill routing, but it should stay disabled unless you explicitly want that tradeoff.
+
+The hook discovers skill candidates dynamically from local skill manifests and workspace signals. You can point it at custom skill files with `CPTO_PROMPT_OPTIMIZER_SKILLS_FILE` or `CPTO_PROMPT_OPTIMIZER_SKILLS_DIRS`, and it will fall back to project-derived hints if no manifests are present.
+
+Enable it only when needed:
+
+```bash
+CPTO_PROMPT_OPTIMIZER_ENABLED=1
+CPTO_PROMPT_OPTIMIZER_API_KEY=...
+```
+
+By default it emits plain text so it fits normal prompt-hook pipelines. Set `CPTO_PROMPT_OPTIMIZER_OUTPUT_FORMAT=json` only if you are wrapping it yourself.
+
+Its logs are compact and structured:
+
+- `.copilot-runtime/prompt-optimizer.ndjson` stores one record per run with hashes, counts, selected skills, and a Copilot-equivalent AI-credit estimate.
+- `.copilot-runtime/prompt-optimizer-daily.ndjson` keeps the rolling daily aggregate.
+- `.copilot-runtime/prompt-optimizer-daily.md` renders the daily aggregate in a readable table.
+
+The AI-credit estimate uses the official GitHub Copilot model pricing table. Token counts are estimated from the prompt text unless your wrapper provides more precise usage data. Set `CPTO_PROMPT_OPTIMIZER_CREDIT_MODEL` if you want to estimate against a different Copilot model.
 
 ## FAQ
 

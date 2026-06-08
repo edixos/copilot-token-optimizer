@@ -211,3 +211,85 @@ describe('user-prompt-ghost-scanner', () => {
     assert.strictEqual(r.stdout.trim(), '');
   });
 });
+
+// ── user-prompt-optimize.sh ──────────────────────────────────────────────
+
+describe('user-prompt-optimize', () => {
+  const SCRIPT = 'user-prompt-optimize.sh';
+  let tmpDir;
+
+  beforeEach(() => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cpto-optimize-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('is off by default', () => {
+    const r = runHook(SCRIPT, { prompt: 'please compress this prompt' }, {}, tmpDir);
+    assert.strictEqual(r.code, 0);
+    assert.strictEqual(r.stdout.trim(), '');
+  });
+
+  it('returns a compressed prompt when enabled and the API responds', () => {
+    const skillDir = path.join(tmpDir, 'skills');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(skillDir, 'custom.skill.md'),
+      '# Custom Deployment Skill\n\nUse when the project has an unusual deployment flow.'
+    );
+
+    const debugSystemFile = path.join(tmpDir, 'optimizer-system.txt');
+    const r = runHook(
+      SCRIPT,
+      { prompt: 'hey can you make the login code cleaner?' },
+      {
+        CPTO_PROMPT_OPTIMIZER_ENABLED: '1',
+        CPTO_PROMPT_OPTIMIZER_MOCK_RESPONSE: JSON.stringify({
+          compressed_prompt: 'Refactor the login flow',
+          required_skills: ['api-integration'],
+        }),
+        CPTO_PROMPT_OPTIMIZER_APPEND_SKILLS: '0',
+        CPTO_PROMPT_OPTIMIZER_DEBUG_SYSTEM_FILE: debugSystemFile,
+        COPILOT_RUNTIME_DIR: path.join(tmpDir, '.copilot-runtime'),
+      },
+      tmpDir
+    );
+
+    assert.strictEqual(r.code, 0);
+    assert.ok(r.stdout.includes('Refactor the login flow'), `stdout: ${r.stdout}`);
+
+    assert.ok(fs.existsSync(debugSystemFile), 'should write the debug system instruction file');
+    const systemInstruction = fs.readFileSync(debugSystemFile, 'utf8');
+    assert.ok(systemInstruction.includes('Custom Deployment Skill'), 'should discover local skill manifests dynamically');
+
+    const logPath = path.join(tmpDir, '.copilot-runtime', 'prompt-optimizer.ndjson');
+    assert.ok(fs.existsSync(logPath), 'should write compact prompt-optimizer log');
+    const logLines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+    assert.equal(logLines.length, 1, 'should append a single compact log record');
+    const logRecord = JSON.parse(logLines[0]);
+    assert.equal(logRecord.status, 'ok');
+    assert.ok(Array.isArray(logRecord.skills), 'log record should store selected skills as an array');
+    assert.ok(logRecord.skills.includes('api-integration'), 'log record should include selected skill hints');
+    assert.ok(logRecord.catalog_count >= 1, 'log record should include a discovered catalog count');
+    assert.equal(logRecord.credit_model, 'gpt-5-mini', 'log record should note the billing model');
+    assert.ok(logRecord.total_ai_credits > 0, 'log record should include a positive credit estimate');
+    assert.ok(!logLines[0].includes('hey can you make the login code cleaner?'), 'log should not store the full prompt');
+
+    const dailyPath = path.join(tmpDir, '.copilot-runtime', 'prompt-optimizer-daily.ndjson');
+    assert.ok(fs.existsSync(dailyPath), 'should write daily summary data');
+    const dailyLines = fs.readFileSync(dailyPath, 'utf8').trim().split('\n');
+    const today = dailyLines.map(line => JSON.parse(line)).find(row => row.date);
+    assert.ok(today, 'should have a daily summary row');
+    assert.equal(today.attempts, 1, 'daily summary should count one run');
+    assert.equal(today.success_runs, 1, 'daily summary should count one successful run');
+    assert.ok(today.credits > 0, 'daily summary should aggregate AI credits');
+
+    const dailyMd = path.join(tmpDir, '.copilot-runtime', 'prompt-optimizer-daily.md');
+    assert.ok(fs.existsSync(dailyMd), 'should write a human-readable daily report');
+    const dailyMdText = fs.readFileSync(dailyMd, 'utf8');
+    assert.ok(dailyMdText.includes('Prompt Optimizer Daily Summary'), 'daily report should have a title');
+    assert.ok(dailyMdText.includes('AI Credits'), 'daily report should mention AI credits');
+  });
+});

@@ -42,6 +42,29 @@ Reusable templates for documentation maintenance and task tracking.
 
 ---
 
+## Hook Templates
+
+### [hooks/user-prompt-optimize.sh](hooks/user-prompt-optimize.sh)
+
+**Purpose**: Optional prompt compressor for wrapper-based Copilot setups
+
+**Use when**: You want prompt normalization and lightweight skill routing, and you are comfortable calling an external model
+
+**Includes**:
+- Prompt compression rules
+- Dynamic skill discovery from local manifests and workspace signals
+- Compact JSONL decision logging
+- Daily aggregate credit reporting
+- Plain-text or JSON output modes
+
+**Token cost**: 0 when not installed, external API usage when enabled
+
+**Default state**: Off. Install it only if you want the extra step, then enable it with `CPTO_PROMPT_OPTIMIZER_ENABLED=1`.
+
+**Pricing note**: the AI-credit estimate follows the published Copilot model pricing table, but token counts are still estimated from the prompt text unless your wrapper provides exact usage data.
+
+---
+
 ## Usage
 
 ### Completion Template
@@ -63,6 +86,15 @@ Reusable templates for documentation maintenance and task tracking.
 1. **At project setup**: Copy to `.copilot/DOCUMENTATION_MAINTENANCE.md`
 2. **Reference in .github/copilot-instructions.md**: Link from session start protocol
 3. **Load as needed**: When updating docs or making structural changes
+
+### Prompt Optimizer Hook
+
+1. Install it with `cpto hooks install user-prompt-optimize`
+2. Keep it disabled by default
+3. Enable it only in the environments that should use the external API
+4. Point `CPTO_PROMPT_OPTIMIZER_SKILLS_FILE` or `CPTO_PROMPT_OPTIMIZER_SKILLS_DIRS` at local skill manifests when you want custom routing hints
+5. Set `CPTO_PROMPT_OPTIMIZER_CREDIT_MODEL` when you want the AI-credit estimate to reflect a different Copilot model
+6. Set `CPTO_PROMPT_OPTIMIZER_OUTPUT_FORMAT=json` only when a wrapper expects structured output
 
 ---
 

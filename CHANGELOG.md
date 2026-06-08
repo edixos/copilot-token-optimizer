@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.17] — 2026-06-08
+
+### Added
+
+- `templates/hooks/user-prompt-optimize.sh` as an optional prompt compressor for wrapper-based Copilot setups
+- Off-by-default gating via `CPTO_PROMPT_OPTIMIZER_ENABLED=1` so the hook stays inert unless explicitly enabled
+- Plain-text output by default, with an opt-in JSON mode for custom wrappers
+- Local routing-history logging for successful runs and graceful bypasses plus a daily aggregate report in both JSONL and markdown form
+- AI-credit estimates are calculated from the official GitHub Copilot model pricing table and can be pointed at a specific model with `CPTO_PROMPT_OPTIMIZER_CREDIT_MODEL`
+- Skill selection driven by dynamic discovery from local skill manifests and workspace signals
+
+
 ## [2.3.16] — 2026-05-20
 
 ### Added
