@@ -19,7 +19,7 @@ jobs:
     steps:
       # Check out the tagged source so npm publishes the exact release contents.
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # Configure Node.js and npm registry authentication for the publish step.
       - name: Set up Node.js
